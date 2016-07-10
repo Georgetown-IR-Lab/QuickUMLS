@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# Build folder
+build/
+
+#Simstring folder
+utils/simstring/
