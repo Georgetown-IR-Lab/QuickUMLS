@@ -88,8 +88,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
-# Build folder
-build/
+# Cache folder
+cache/
 
 #Simstring folder
 simstring/
