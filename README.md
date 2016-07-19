@@ -35,9 +35,10 @@ Where:
 - `threshold` (default: 0.7) is the minimum similarity value between strings.
 - `similarity_name` (default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
 - `window` (default: 5) is the maximum number of tokens to consider for matching.s
+- `accepted_semtypes` (default: see `constants.py`) is the set of UMLS semantic types concepts should belong to. Semantic types are identified by the letter "T" followed by three numbers (e.g., "T131", which identifies the type *"Hazardous or Poisonous Substance"*). See [here](https://metamap.nlm.nih.gov/Docs/SemanticTypes_2013AA.txt) for the full list.
 
 
 ## References
 
 - Okazaki, Naoaki, and Jun'ichi Tsujii. "*Simple and efficient algorithm for approximate dictionary matching.*" COLING 2010.
-- Luca Soldaini and Nazli Goharian. "*QuickUMLS: a Fast, Unsupervised Approach for Medical Concept Extraction.*" MedIR Workshop, SIGIR 2016.
+- Luca Soldaini and Nazli Goharian. "*QuickUMLS: a fast, unsupervised approach for medical concept extraction.*" MedIR Workshop, SIGIR 2016.
