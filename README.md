@@ -40,4 +40,4 @@ Where:
 ## References
 
 - Okazaki, Naoaki, and Jun'ichi Tsujii. "*Simple and efficient algorithm for approximate dictionary matching.*" COLING 2010.
-- Luca Soldaini and Nazli Goharian. "*QuickUMLS: a fast, unsupervised approach for medical concept extraction.*" MedIR Workshop, SIGIR 2016.
+- Luca Soldaini and Nazli Goharian. "*QuickUMLS: a Fast, Unsupervised Approach for Medical Concept Extraction.*" MedIR Workshop, SIGIR 2016.
