@@ -6,6 +6,8 @@ HEADERS_MRSTY = [
     'cui', 'sty', 'hier' 'desc', 'sid', 'num'
 ]
 
+NEGATIONS = {'none', 'non', 'neither', 'nor', 'no', 'not'}
+
 ACCEPTED_SEMTYPES = {
     'T029',     # Body Location or Region
     'T023',     # Body Part, Organ, or Organ Component

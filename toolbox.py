@@ -46,10 +46,13 @@ def count_ngrams(s, n):
 
 
 def safe_unicode(s):
-    try:
-        s = u'%s' % s
-    except UnicodeDecodeError:
-        s = u'%s' % s.decode('utf-8')
+    if six.PY2:
+        # in python 3, there no ambiguity on whether
+        # a string is encoded in bytes format or not
+        try:
+            s = u'%s' % s
+        except UnicodeDecodeError:
+            s = u'%s' % s.decode('utf-8')
 
     return u'{}'.format(unicodedata.normalize('NFKD', s))
 
@@ -63,7 +66,7 @@ def prepare_string_for_db_input(s):
 
 def make_ngrams(s, n):
     s = u'$${}$$'.format(safe_unicode(s))
-    return (s[i:i+n] for i in xrange(len(s) - n + 1))
+    return (s[i:i+n] for i in xrange3(len(s) - n + 1))
 
 
 def get_similarity(x, y, n, similarity_name):
@@ -103,14 +106,7 @@ class SimpleTokenizer(object):
         self.re_tokenize = re.compile(r'&\w+;|\W+|_')
 
     def tokenize(self, text, lower=True):
-        """Tokenize text
-
-        Args:
-            text (unicode): text to tokenizer
-
-        Yields:
-            tok (unicode): token
-        """
+        """Tokenize text"""
         if lower:
             text = text.lower()
         for tok in self.re_tokenize.split(text):
@@ -124,6 +120,14 @@ class SimpleTokenizer(object):
             tok for tok in self.re_tokenize.split(text)
             if len(tok) >= self.min_length and tok not in self.stopwords
         ]
+
+
+def xrange3(*args, **kwargs):
+    """xrange in Python 2, range in Python 3"""
+    if six.PY3:
+        return range(*args, **kwargs)
+    else:
+        return xrange(*args, **kwargs)
 
 
 def db_key_encode(term):
