@@ -11,17 +11,18 @@ import spacy
 from toolbox import SimpleTokenizer, SimstringDBReader, CuiSemTypesDB, get_similarity, Intervals, safe_unicode, xrange3
 from constants import ACCEPTED_SEMTYPES, UNICODE_DASHES, NEGATIONS
 
-class TextMatching(object):
+class QuickUMLS(object):
     def __init__(
             self, quickumls_fp,
-            mode='score', threshold=0.7, similarity_name='jaccard',
-            window=5, ngram_length=3, accepted_semtypes=ACCEPTED_SEMTYPES,
-            valid_punct=UNICODE_DASHES):
+            overlapping_criteria='score', threshold=0.7, ngram_length=3,
+            similarity_name='jaccard', window=5,
+            valid_punct=UNICODE_DASHES, accepted_semtypes=ACCEPTED_SEMTYPES):
 
-        err_msg = '"{}" is not a valid mode. Use "longest" or "score"'
-        assert mode in {'logest', 'score'}, err_msg
+        err_msg = ('"{}" is not a valid overlapping_criteria. '
+                   'Use "length" or "score"')
+        assert overlapping_criteria in {'length', 'score'}, err_msg
 
-        self.mode = mode
+        self.overlapping_criteria = overlapping_criteria
 
         simstring_fp = os.path.join(quickumls_fp, 'umls-simstring.db')
         cuisem_fp = os.path.join(quickumls_fp, 'cui-semtypes.db')
@@ -214,7 +215,7 @@ class TextMatching(object):
 
     def _select_terms(self, matches):
         sort_func = (
-            self._select_longest if self.mode == 'longest'
+            self._select_longest if self.overlapping_criteria == 'length'
             else self._select_score
         )
 
