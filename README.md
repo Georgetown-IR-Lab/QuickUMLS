@@ -4,20 +4,24 @@ QuickUMLS (Soldaini and Goharian, 2015) is a tool for fast, unsupervised  biomed
 It takes advantage of [Simstring](http://www.chokkan.org/software/simstring/) (Okazaki and Tsujii, 2010) for approximate string matching.
 For more details on how QuickUMLS works, we remand to our paper.
 
-This project should be compatible with both Python 2 and 3. **If you find any bugs, please file an issue here on GitHub or email the author at `luca@ir.cs.georgetown.edu`**
+This project should be compatible with both Python 2 and 3. **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
 
 ## Installation
 
-Before starting:
+#### Before Starting
 
 1. This software requires all packages listed in the requirements.txt file. You can install all of them by running `pip install -r requirements.txt`.
 2. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy.en.download`.
 3. This system requires you to have a valid UMLS installation on disk. The installation can be remove once the system has been initialized.
 
-To get the system running:
+#### To get the System Running
 
 1. Download and compile Simstring by running `sh setup_simstring.sh <python_version>`, where `<python_version>` is either "`2`" or "`3`".
-2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the
+2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast is the drive where UMLS and QuickUMLS files should be stored.
+
+## APIs
+
+
 
 ## References
 
