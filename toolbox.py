@@ -25,6 +25,14 @@ import leveldb
 from simstring import simstring
 
 
+def pickle_loading(data):
+    pass
+
+
+def pickle_dumping(data):
+    pass
+
+
 def mkdir(path):
     try:
         os.makedirs(path)
@@ -43,7 +51,7 @@ def safe_unicode(s):
     except UnicodeDecodeError:
         s = u'%s' % s.decode('utf-8')
 
-    return unicodedata.normalize('NFKD', s)
+    return u'{}'.format(unicodedata.normalize('NFKD', s))
 
 
 def prepare_string_for_db_input(s):
@@ -118,6 +126,13 @@ class SimpleTokenizer(object):
         ]
 
 
+def db_key_encode(term):
+    if six.PY2:
+        return term
+    else:
+        return term.encode('utf-8')
+
+
 def countlines(fn):
     """Count lines in fn. Slightly modified version of
     http://stackoverflow.com/a/27518377"""
@@ -150,7 +165,7 @@ class SimstringDBWriter(object):
         )
 
     def insert(self, term):
-        prepare_string_for_db_input(safe_unicode(term))
+        term = prepare_string_for_db_input(safe_unicode(term))
         self.db.insert(term)
 
 
@@ -212,7 +227,7 @@ class CuiSemTypesDB(object):
     def has_term(self, term):
         term = prepare_string_for_db_input(safe_unicode(term))
         try:
-            self.cui_db.Get(term)
+            self.cui_db.Get(db_key_encode(term))
             return True
         except KeyError:
             return
@@ -224,23 +239,26 @@ class CuiSemTypesDB(object):
         # some terms have multiple cuis associated with them,
         # so we store them all
         try:
-            cuis = pickle.loads(self.cui_db.Get(term))
+            cuis = pickle.loads(self.cui_db.Get(db_key_encode(term)))
         except KeyError:
             cuis = set()
-        finally:
-            cuis.add(cui)
-            self.cui_db.Put(term, pickle.dumps(cuis))
+
+        cuis.add(cui)
+        self.cui_db.Put(db_key_encode(term), pickle.dumps(cuis))
 
         try:
-            self.semtypes_db.Get(cui)
+            self.semtypes_db.Get(db_key_encode(cui))
         except KeyError:
-            self.semtypes_db.Put(cui, pickle.dumps(set(semtypes)))
+            self.semtypes_db.Put(
+                db_key_encode(cui), pickle.dumps(set(semtypes))
+            )
 
     def get(self, term):
         term = prepare_string_for_db_input(safe_unicode(term))
 
-        cuis = pickle.loads(self.cui_db.Get(term))
+        cuis = pickle.loads(self.cui_db.Get(db_key_encode(term)))
         matches = (
-            (cui, pickle.loads(self.semtypes_db.Get(cui))) for cui in cuis
+            (cui, pickle.loads(self.semtypes_db.Get(db_key_encode(cui))))
+            for cui in cuis
         )
         return matches

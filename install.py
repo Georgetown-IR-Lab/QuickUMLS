@@ -7,13 +7,13 @@ import time
 import codecs
 import argparse
 
-from .toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
-from .constants import HEADERS_MRCONSO, HEADERS_MRSTY
+from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
+from constants import HEADERS_MRCONSO, HEADERS_MRSTY
 
 
 def get_semantic_types(path, headers):
     sem_types = {}
-    with codecs.open(path, 'rb', 'utf-8') as f:
+    with codecs.open(path, encoding='utf-8') as f:
         for i, ln in enumerate(f):
             content = dict(zip(headers, ln.strip().split('|')))
 
@@ -23,7 +23,7 @@ def get_semantic_types(path, headers):
 
 
 def get_mrconso_iterator(path, headers):
-    with codecs.open(path, 'rb', 'utf-8') as f:
+    with codecs.open(path, encoding='utf-8') as f:
         for i, ln in enumerate(f):
             content = dict(zip(headers, ln.strip().split('|')))
 
@@ -76,33 +76,20 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
 
-    total_lines = countlines(extracted_src)
     start = time.time()
 
     ss_db = SimstringDBWriter(simstring_dir)
 
     cuisty_db = CuiSemTypesDB(cuisty_dir)
 
-    with codecs.open(extracted_src, encoding='utf-8') as f:
-        for i, (term, cui, stys) in enumerate(extracted_it, start=1):
-            ss_db.insert(term)
-            cuisty_db.insert(term, cui, stys)
+    for i, (term, cui, stys) in enumerate(extracted_it, start=1):
+        ss_db.insert(term)
+        cuisty_db.insert(term, cui, stys)
 
 
 def driver(opts):
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        'umls_installation_path',
-        help=('Location of UMLS installation files (`MRCONSO.MRR` and '
-              '`MRSTY.MRR` files)')
-    )
-    ap.add_argument(
-        'destination_path',
-        help='Location where the necessary QuickUMLS files are installed')
-    opts = ap.parse_args()
-
-    mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.MRR')
-    mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.MRR')
+    mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
+    mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.RRF')
 
     mrconso_iterator = extract_from_mrconso(mrconso_path, mrsty_path)
 
@@ -114,4 +101,15 @@ def driver(opts):
     print('Completed!')
 
 if __name__ == '__main__':
-    driver()
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        'umls_installation_path',
+        help=('Location of UMLS installation files (`MRCONSO.RRF` and '
+              '`MRSTY.RRF` files)')
+    )
+    ap.add_argument(
+        'destination_path',
+        help='Location where the necessary QuickUMLS files are installed')
+    opts = ap.parse_args()
+
+    driver(opts)
