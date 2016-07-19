@@ -10,7 +10,6 @@ import argparse
 from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
 from constants import HEADERS_MRCONSO, HEADERS_MRSTY
 
-
 def get_semantic_types(path, headers):
     sem_types = {}
     with codecs.open(path, encoding='utf-8') as f:
