@@ -21,6 +21,21 @@ This project should be compatible with both Python 2 and 3. **If you find any bu
 
 ## APIs
 
+A QuickUMLS object can be instantiated as follows:
+
+python
+```
+matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
+                    similarity_name, window, accepted_semtypes)
+```
+
+Where:
+
+- `quickumls_fp` is the directory where the QuickUmls data files are installed.
+- `overlapping_criteria` (default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
+- `threshold` (default: 0.7) is the minimum similarity value between strings.
+- `similarity_name` (default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
+- `window` (default: 5) is the maximum number of tokens to consider for matching.
 
 
 ## References
