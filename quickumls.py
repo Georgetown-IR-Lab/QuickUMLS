@@ -14,25 +14,30 @@ from constants import ACCEPTED_SEMTYPES, UNICODE_DASHES, NEGATIONS
 class QuickUMLS(object):
     def __init__(
             self, quickumls_fp,
-            overlapping_criteria='score', threshold=0.7, ngram_length=3,
-            similarity_name='jaccard', window=5,
-            valid_punct=UNICODE_DASHES, accepted_semtypes=ACCEPTED_SEMTYPES):
+            overlapping_criteria='score', threshold=0.7, window=5,
+            similarity_name='jaccard', accepted_semtypes=ACCEPTED_SEMTYPES):
 
-        err_msg = ('"{}" is not a valid overlapping_criteria. '
-                   'Use "length" or "score"')
-        assert overlapping_criteria in {'length', 'score'}, err_msg
-
+        valid_criteria = {'length', 'score'}
+        err_msg = ('"{}" is not a valid overlapping_criteria. Choose '
+                   'between {}'.format(
+                        overlapping_criteria, ', '.join(valid_criteria)))
+        assert overlapping_criteria in valid_criteria, err_msg
         self.overlapping_criteria = overlapping_criteria
+
+        valid_similarities = {'dice', 'jaccard', 'cosine', 'overlap'}
+        err_msg = ('"{}" is not a valid similarity name. Choose between '
+                   '{}'.format(similarity, ', '.join(valid_similarities)))
+        assert valid_similarities in valid_similarities, err_msg
+        self.similarity_name = similarity_name
 
         simstring_fp = os.path.join(quickumls_fp, 'umls-simstring.db')
         cuisem_fp = os.path.join(quickumls_fp, 'cui-semtypes.db')
 
-        self.valid_punct = valid_punct
+        self.valid_punct = UNICODE_DASHES
 
         self.window = window
-        self.ngram_length = ngram_length
+        self.ngram_length = 3
         self.threshold = threshold
-        self.similarity_name = similarity_name
         self._info = None
 
         self.accepted_semtypes = accepted_semtypes
