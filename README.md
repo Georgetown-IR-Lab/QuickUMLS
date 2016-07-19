@@ -24,8 +24,8 @@ This project should be compatible with both Python 2 and 3. **If you find any bu
 A QuickUMLS object can be instantiated as follows:
 
 ```python
-matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
-                    similarity_name, window, accepted_semtypes)
+>>> matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
+                        similarity_name, window, accepted_semtypes)
 ```
 
 Where:
@@ -36,6 +36,15 @@ Where:
 - `similarity_name` (default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
 - `window` (default: 5) is the maximum number of tokens to consider for matching.s
 - `accepted_semtypes` (default: see `constants.py`) is the set of UMLS semantic types concepts should belong to. Semantic types are identified by the letter "T" followed by three numbers (e.g., "T131", which identifies the type *"Hazardous or Poisonous Substance"*). See [here](https://metamap.nlm.nih.gov/Docs/SemanticTypes_2013AA.txt) for the full list.
+
+To use the matcher, simply call
+
+```python
+>>> text = "The ulna has dislocated posteriorly from the trochlea of the humerus."
+>>> matcher.match(text, best_match=True, ignore_syntax=False)
+```
+
+Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2015).
 
 
 ## References
