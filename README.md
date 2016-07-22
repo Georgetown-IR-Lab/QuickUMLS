@@ -1,6 +1,6 @@
 # QuickUMLS
 
-QuickUMLS (Soldaini and Goharian, 2015) is a tool for fast, unsupervised  biomedical concept extraction from medical text.
+QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomedical concept extraction from medical text.
 It takes advantage of [Simstring](http://www.chokkan.org/software/simstring/) (Okazaki and Tsujii, 2010) for approximate string matching.
 For more details on how QuickUMLS works, we remand to our paper.
 
@@ -44,7 +44,7 @@ To use the matcher, simply call
 >>> matcher.match(text, best_match=True, ignore_syntax=False)
 ```
 
-Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2015).
+Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2016).
 
 
 ## References
