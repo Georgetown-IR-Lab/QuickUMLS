@@ -42,9 +42,9 @@ echo "Making Simstring..."
 cd "simstring"
 if [[ "$PYTHON_VERSION" == "2" ]]
 then
-    sh "install_python.sh"
+    bash "install_python.sh"
 else
-    sh "install_python3.sh"
+    bash "install_python3.sh"
 fi
 
 # install in the right location
