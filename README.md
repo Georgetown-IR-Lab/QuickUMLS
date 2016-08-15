@@ -4,7 +4,7 @@ QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomed
 It takes advantage of [Simstring](http://www.chokkan.org/software/simstring/) (Okazaki and Tsujii, 2010) for approximate string matching.
 For more details on how QuickUMLS works, we remand to our paper.
 
-This project should be compatible with both Python 2 and 3. **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
+This project should be compatible with both Python 2 and 3 and run on any UNIX system (sorry, no Windows support). **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
 
 ## Installation
 
@@ -16,7 +16,7 @@ This project should be compatible with both Python 2 and 3. **If you find any bu
 
 #### To get the System Running
 
-1. Download and compile Simstring by running `sh setup_simstring.sh <python_version>`, where `<python_version>` is either "`2`" or "`3`".
+1. Download and compile Simstring by running `bash setup_simstring.sh <python_version>`, where `<python_version>` is either "`2`" or "`3`".
 2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast is the drive where UMLS and QuickUMLS files should be stored.
 
 ## APIs
