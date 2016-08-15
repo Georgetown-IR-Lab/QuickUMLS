@@ -1,12 +1,27 @@
-# Script variables
-RELEASE_VERSION="v1.1.1"
-RELEASE_FILENAME="simstring_$RELEASE_VERSION.tar.gz"
-RELEASE_URL="https://github.com/Georgetown-IR-Lab/simstring/releases/download/$RELEASE_VERSION/$RELEASE_FILENAME"
-
 # Checks if python version has been provided
 if [[ -z "$1" ]]
 then
     echo "No Python version specified." 1>&2;
+    exit 1
+fi
+
+# read the release version (if provided)
+if [[ ! -z "$2" ]]
+then
+    RELEASE_VERSION="$2"
+else
+    RELEASE_VERSION="v1.1.1"
+fi
+RELEASE_FILENAME="simstring_$RELEASE_VERSION.tar.gz"
+RELEASE_URL="https://github.com/Georgetown-IR-Lab/simstring/releases/download/$RELEASE_VERSION/$RELEASE_FILENAME"
+
+echo $RELEASE_URL
+
+# check if url returns 400 or 500 status
+RELEASE_HTTP_CODE=`curl -o /dev/null --silent --head --write-out '%{http_code}' $RELEASE_URL`
+if [[ "$RELEASE_HTTP_CODE" -ge "400" ]]
+    then
+    echo "Release not found" 1>&2;
     exit 1
 fi
 
@@ -23,7 +38,7 @@ PYTHON_VERSION=$1
 # Remove any existsing simstring folder (ask for for permession!)
 if [[ -d "simstring" ]]
 then
-    read -p "'simstring' directory exists. If you proceed, the folder will be deleted. Continue? [y/n]" yn
+    read -p "'simstring' directory exists. If you proceed, the folder will be deleted. Continue? [y/n] " yn
      case $yn in
         [Yy]* ) rm -rf simstring;;
         [Nn]* ) exit;;
