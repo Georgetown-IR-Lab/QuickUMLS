@@ -1,5 +1,5 @@
 # future statements for Python 2 compatibility
-from __future__ import unicode_literals, division, print_function
+from __future__ import unicode_literals, division, print_function, absolute_import
 
 # built in modules
 import os
@@ -8,14 +8,18 @@ import os
 import spacy
 
 # project modules
-from toolbox import SimpleTokenizer, SimstringDBReader, CuiSemTypesDB, get_similarity, Intervals, safe_unicode, xrange3
-from constants import ACCEPTED_SEMTYPES, UNICODE_DASHES, NEGATIONS
+try:
+    import toolbox
+    import constants
+except ImportError:
+    from . import toolbox
+    from . import constants
 
 class QuickUMLS(object):
     def __init__(
             self, quickumls_fp,
             overlapping_criteria='score', threshold=0.7, window=5,
-            similarity_name='jaccard', accepted_semtypes=ACCEPTED_SEMTYPES):
+            similarity_name='jaccard', accepted_semtypes=constants.ACCEPTED_SEMTYPES):
 
         valid_criteria = {'length', 'score'}
         err_msg = ('"{}" is not a valid overlapping_criteria. Choose '
@@ -26,14 +30,14 @@ class QuickUMLS(object):
 
         valid_similarities = {'dice', 'jaccard', 'cosine', 'overlap'}
         err_msg = ('"{}" is not a valid similarity name. Choose between '
-                   '{}'.format(similarity, ', '.join(valid_similarities)))
-        assert valid_similarities in valid_similarities, err_msg
+                   '{}'.format(similarity_name, ', '.join(valid_similarities)))
+        assert not(valid_similarities in valid_similarities), err_msg
         self.similarity_name = similarity_name
 
         simstring_fp = os.path.join(quickumls_fp, 'umls-simstring.db')
         cuisem_fp = os.path.join(quickumls_fp, 'cui-semtypes.db')
 
-        self.valid_punct = UNICODE_DASHES
+        self.valid_punct = constants.UNICODE_DASHES
 
         self.window = window
         self.ngram_length = 3
@@ -43,10 +47,9 @@ class QuickUMLS(object):
         self.accepted_semtypes = accepted_semtypes
 
         self.ss_db =\
-            SimstringDBReader(simstring_fp, similarity_name, threshold)
-        self.cuisem_db = CuiSemTypesDB(cuisem_fp)
+            toolbox.SimstringDBReader(simstring_fp, similarity_name, threshold)
+        self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
         self.nlp = spacy.load('en')
-        self.negations = NEGATIONS
 
     @property
     def info(self):
@@ -111,7 +114,7 @@ class QuickUMLS(object):
             token.i for token in sent if not self._is_valid_middle_token(token)
         }
 
-        for i in xrange3(sent_length):
+        for i in toolbox.xrange3(sent_length):
             tok = sent[i]
 
             if not self._is_valid_token(tok):
@@ -132,7 +135,7 @@ class QuickUMLS(object):
                 yield(tok.idx, tok.idx + len(tok), tok.text)
 
 
-            for j in xrange3(i + 1, span_end):
+            for j in toolbox.xrange3(i + 1, span_end):
                 if compensate:
                     compensate = False
                     continue
@@ -170,7 +173,7 @@ class QuickUMLS(object):
                 cuisem_match = sorted(self.cuisem_db.get(match))
 
                 for cui, semtypes in cuisem_match:
-                    match_similarity = get_similarity(
+                    match_similarity = toolbox.get_similarity(
                         x=ngram_normalized.lower(),
                         y=match.lower(),
                         n=self.ngram_length,
@@ -193,7 +196,7 @@ class QuickUMLS(object):
                             'start': start,
                             'end': end,
                             'ngram': ngram,
-                            'term': safe_unicode(match),
+                            'term': toolbox.safe_unicode(match),
                             'cui': cui,
                             'similarity': match_similarity,
                             'semtypes': semtypes
@@ -226,7 +229,7 @@ class QuickUMLS(object):
 
         matches = sorted(matches, key=sort_func, reverse=True)
 
-        intervals = Intervals()
+        intervals = toolbox.Intervals()
         final_matches_subset = []
 
         for match in matches:

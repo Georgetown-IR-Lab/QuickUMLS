@@ -22,7 +22,10 @@ import numpy
 import leveldb
 
 # project imports
-from simstring import simstring
+try:
+    from simstring import simstring
+except ImportError:
+    from .simstring import simstring
 
 
 def pickle_loading(data):
