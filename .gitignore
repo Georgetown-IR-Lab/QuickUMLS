@@ -93,3 +93,6 @@ cache/
 
 #Simstring folder
 simstring/
+
+# Ignored test file
+test.py
