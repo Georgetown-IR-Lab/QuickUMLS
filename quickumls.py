@@ -38,6 +38,7 @@ class QuickUMLS(object):
         cuisem_fp = os.path.join(quickumls_fp, 'cui-semtypes.db')
 
         self.valid_punct = constants.UNICODE_DASHES
+        self.negations = constants.NEGATIONS
 
         self.window = window
         self.ngram_length = 3
