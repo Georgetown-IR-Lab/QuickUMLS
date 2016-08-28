@@ -2,13 +2,13 @@ from __future__ import unicode_literals, division, print_function
 
 import os
 import sys
-import six
 import time
 import codecs
 import argparse
 
 from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
 from constants import HEADERS_MRCONSO, HEADERS_MRSTY
+
 
 def get_semantic_types(path, headers):
     sem_types = {}
@@ -74,8 +74,6 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
     # Create destination directories for the two databases
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
-
-    start = time.time()
 
     ss_db = SimstringDBWriter(simstring_dir)
 

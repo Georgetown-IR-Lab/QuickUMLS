@@ -15,11 +15,13 @@ except ImportError:
     from . import toolbox
     from . import constants
 
+
 class QuickUMLS(object):
     def __init__(
             self, quickumls_fp,
             overlapping_criteria='score', threshold=0.7, window=5,
-            similarity_name='jaccard', accepted_semtypes=constants.ACCEPTED_SEMTYPES):
+            similarity_name='jaccard',
+            accepted_semtypes=constants.ACCEPTED_SEMTYPES):
 
         valid_criteria = {'length', 'score'}
         err_msg = ('"{}" is not a valid overlapping_criteria. Choose '
@@ -135,7 +137,6 @@ class QuickUMLS(object):
             if i + 1 == sent_length and self._is_valid_end_token(tok):
                 yield(tok.idx, tok.idx + len(tok), tok.text)
 
-
             for j in toolbox.xrange3(i + 1, span_end):
                 if compensate:
                     compensate = False
@@ -154,7 +155,6 @@ class QuickUMLS(object):
                         ''.join(token.text_with_ws for token in span
                                 if token.i not in skip_in_span).strip()
                     )
-
 
     def _get_all_matches(self, ngrams):
         matches = []
@@ -243,7 +243,8 @@ class QuickUMLS(object):
 
     def _make_token_sequences(self, parsed):
         for i in range(len(parsed)):
-            for j in xrange3(i + 1, min(i + self.window, len(parsed)) + 1):
+            for j in toolbox.xrange3(
+                    i + 1, min(i + self.window, len(parsed)) + 1):
                 span = parsed[i:j]
                 yield (span.start_char, span.end_char, span.text)
 

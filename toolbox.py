@@ -4,18 +4,9 @@ from __future__ import unicode_literals, division, print_function
 import re
 import os
 import six
-import time
-import codecs
 import unicodedata
-from functools import wraps
 from string import punctuation
 from itertools import takewhile, repeat
-
-# Python version specific imports
-if six.PY2:
-    import cPickle as pickle
-else:
-    import pickle
 
 # installed modules
 import numpy
@@ -26,6 +17,12 @@ try:
     from simstring import simstring
 except ImportError:
     from .simstring import simstring
+
+# Python version specific imports
+if six.PY2:
+    import cPickle as pickle
+else:
+    import pickle
 
 
 def pickle_loading(data):
@@ -75,7 +72,7 @@ def make_ngrams(s, n):
 def get_similarity(x, y, n, similarity_name):
     X, Y = set(make_ngrams(x, n)), set(make_ngrams(y, n))
     if similarity_name == 'dice':
-        return 2 * len (X & Y) / (len(X) + len(Y))
+        return 2 * len(X & Y) / (len(X) + len(Y))
     elif similarity_name == 'jaccard':
         return len(X & Y) / len(X | Y)
     elif similarity_name == 'cosine':
