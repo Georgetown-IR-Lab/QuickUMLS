@@ -1,5 +1,6 @@
 # future statements for Python 2 compatibility
-from __future__ import unicode_literals, division, print_function, absolute_import
+from __future__ import (
+    unicode_literals, division, print_function, absolute_import)
 
 # built in modules
 import os
