@@ -7,6 +7,7 @@ import os
 
 # installed modules
 import spacy
+from unidecode import unidecode
 
 # project modules
 try:
@@ -21,7 +22,7 @@ class QuickUMLS(object):
     def __init__(
             self, quickumls_fp,
             overlapping_criteria='score', threshold=0.7, window=5,
-            similarity_name='jaccard',
+            similarity_name='jaccard', min_match_length=3,
             accepted_semtypes=constants.ACCEPTED_SEMTYPES):
 
         valid_criteria = {'length', 'score'}
@@ -46,12 +47,21 @@ class QuickUMLS(object):
         self.window = window
         self.ngram_length = 3
         self.threshold = threshold
+        self.min_match_length = min_match_length
+        self.to_lowercase_flag = os.path.exists(
+            os.path.join(quickumls_fp, 'lowercase.flag')
+        )
+        self.normalize_unicode_flag = os.path.exists(
+            os.path.join(quickumls_fp, 'normalize-unicode.flag')
+        )
+
         self._info = None
 
         self.accepted_semtypes = accepted_semtypes
 
-        self.ss_db =\
-            toolbox.SimstringDBReader(simstring_fp, similarity_name, threshold)
+        self.ss_db = toolbox.SimstringDBReader(
+            simstring_fp, similarity_name, threshold
+        )
         self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
         self.nlp = spacy.load('en')
 
@@ -65,6 +75,7 @@ class QuickUMLS(object):
                 'similarity_name': self.similarity_name,
                 'window': self.window,
                 'ngram_length': self.ngram_length,
+                'min_match_length': self.min_match_length,
                 'accepted_semtypes': sorted(self.accepted_semtypes),
                 'negations': sorted(self.negations),
                 'valid_punct': sorted(self.valid_punct)
@@ -107,6 +118,9 @@ class QuickUMLS(object):
             ok = any(sem in self.accepted_semtypes for sem in target_semtypes)
         return ok
 
+    def _is_longer_than_min(self, span):
+        return (span.end_char - span.start_char) >= self.min_match_length
+
     def _make_ngrams(self, sent):
         sent_length = len(sent)
 
@@ -135,7 +149,11 @@ class QuickUMLS(object):
 
             # we take a shortcut if the token is the last one
             # in the sentence
-            if i + 1 == sent_length and self._is_valid_end_token(tok):
+            if (
+                i + 1 == sent_length and            # it's the last token
+                self._is_valid_end_token(tok) and   # it's a valid end token
+                len(tok) >= self.min_match_length   # it's of miminum length
+            ):
                 yield(tok.idx, tok.idx + len(tok), tok.text)
 
             for j in toolbox.xrange3(i + 1, span_end):
@@ -146,28 +164,41 @@ class QuickUMLS(object):
                 if sent[j - 1] in invalid_mid_tokens:
                     break
 
-                valid_span = self._is_valid_end_token(sent[j - 1])
+                if not self._is_valid_end_token(sent[j - 1]):
+                    continue
 
-                if valid_span:
-                    span = sent[i:j]
+                span = sent[i:j]
 
-                    yield (
-                        span.start_char, span.end_char,
-                        ''.join(token.text_with_ws for token in span
-                                if token.i not in skip_in_span).strip()
-                    )
+                if not self._is_longer_than_min(span):
+                    continue
+
+                yield (
+                    span.start_char, span.end_char,
+                    ''.join(token.text_with_ws for token in span
+                            if token.i not in skip_in_span).strip()
+                )
 
     def _get_all_matches(self, ngrams):
         matches = []
         for start, end, ngram in ngrams:
-            prev_cui = None
-            ngram_cands = list(self.ss_db.get(ngram))
+            ngram_normalized = ngram
 
-            if ngram.isupper():
-                ngram_normalized = ngram.lower()
-                ngram_cands = list(self.ss_db.get(ngram_normalized))
-            else:
-                ngram_normalized = ngram
+            if self.normalize_unicode_flag:
+                ngram_normalized = unidecode(ngram_normalized)
+
+            # make it lowercase
+            if self.to_lowercase_flag:
+                ngram_normalized = ngram_normalized.lower()
+
+            # if the term is all uppercase, it might be the case that
+            # no match is found; so we convert to lowercase;
+            # however, this is never needed if the string is lowercased
+            # in the step above
+            if not self.to_lowercase_flag and ngram_normalized.isupper():
+                ngram_normalized = ngram_normalized.lower()
+
+            prev_cui = None
+            ngram_cands = list(self.ss_db.get(ngram_normalized))
 
             ngram_matches = []
 
