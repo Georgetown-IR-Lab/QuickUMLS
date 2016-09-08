@@ -40,7 +40,7 @@ def get_mrconso_iterator(path, headers):
 
 
 def extract_from_mrconso(
-        mrconso_path, mrsty_path, opts,
+        mrconso_path, mrsty_kpath, opts,
         mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
 
     start = time.time()
@@ -68,6 +68,7 @@ def extract_from_mrconso(
             print(status)
 
         concept_text = content['str'].strip()
+        cui = content['cui']
 
         if opts.lowercase:
             concept_text = concept_text.lower()
@@ -75,12 +76,12 @@ def extract_from_mrconso(
         if opts.normalize_unicode:
             concept_text = unidecode(concept_text)
 
-        if concept_text in processed:
+        if (cui, concept_text) in processed:
             continue
         else:
-            processed.add(concept_text)
+            processed.add((cui, concept_text))
 
-        yield (concept_text, content['cui'], sem_types[content['cui']])
+        yield (concept_text, cui, sem_types[cui])
 
 
 def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
