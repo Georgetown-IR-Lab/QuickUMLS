@@ -1,3 +1,5 @@
+**We recommend to download the latest tested version form the [release section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**
+
 # QuickUMLS
 
 QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomedical concept extraction from medical text.
