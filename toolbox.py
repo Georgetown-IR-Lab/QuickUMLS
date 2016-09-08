@@ -65,7 +65,7 @@ def prepare_string_for_db_input(s):
 
 
 def make_ngrams(s, n):
-    s = u'$${}$$'.format(safe_unicode(s))
+    s = u'{t}{s}{t}'.format(s=safe_unicode(s), t=('$' * (n - 1)))
     return (s[i:i+n] for i in xrange3(len(s) - n + 1))
 
 
@@ -236,7 +236,7 @@ class CuiSemTypesDB(object):
         except KeyError:
             return
 
-    def insert(self, term, cui, semtypes):
+    def insert(self, term, cui, semtypes, is_preferred):
         term = prepare_string_for_db_input(safe_unicode(term))
         cui = prepare_string_for_db_input(safe_unicode(cui))
 
@@ -247,7 +247,7 @@ class CuiSemTypesDB(object):
         except KeyError:
             cuis = set()
 
-        cuis.add(cui)
+        cuis.add((cui, is_preferred))
         self.cui_db.Put(db_key_encode(term), pickle.dumps(cuis))
 
         try:
@@ -262,7 +262,11 @@ class CuiSemTypesDB(object):
 
         cuis = pickle.loads(self.cui_db.Get(db_key_encode(term)))
         matches = (
-            (cui, pickle.loads(self.semtypes_db.Get(db_key_encode(cui))))
-            for cui in cuis
+            (
+                cui,
+                pickle.loads(self.semtypes_db.Get(db_key_encode(cui))),
+                is_preferred
+            )
+            for cui, is_preferred in cuis
         )
         return matches

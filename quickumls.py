@@ -205,7 +205,7 @@ class QuickUMLS(object):
             for match in ngram_cands:
                 cuisem_match = sorted(self.cuisem_db.get(match))
 
-                for cui, semtypes in cuisem_match:
+                for cui, semtypes, preferred in cuisem_match:
                     match_similarity = toolbox.get_similarity(
                         x=ngram_normalized.lower(),
                         y=match.lower(),
@@ -232,7 +232,8 @@ class QuickUMLS(object):
                             'term': toolbox.safe_unicode(match),
                             'cui': cui,
                             'similarity': match_similarity,
-                            'semtypes': semtypes
+                            'semtypes': semtypes,
+                            'preferred': preferred
                         }
                     )
 
@@ -240,7 +241,7 @@ class QuickUMLS(object):
                 matches.append(
                     sorted(
                         ngram_matches,
-                        key=lambda m: m['similarity'],
+                        key=lambda m: m['similarity'] + m['preferred'],
                         reverse=True
                     )
                 )
