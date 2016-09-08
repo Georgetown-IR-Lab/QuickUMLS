@@ -207,8 +207,8 @@ class QuickUMLS(object):
 
                 for cui, semtypes, preferred in cuisem_match:
                     match_similarity = toolbox.get_similarity(
-                        x=ngram_normalized.lower(),
-                        y=match.lower(),
+                        x=ngram_normalized,
+                        y=match,
                         n=self.ngram_length,
                         similarity_name=self.similarity_name
                     )
