@@ -1,14 +1,21 @@
 from __future__ import unicode_literals, division, print_function
 
+# built in modules
 import os
 import sys
-import six
 import time
 import codecs
 import argparse
 
+# project modules
 from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
 from constants import HEADERS_MRCONSO, HEADERS_MRSTY
+
+try:
+    from unidecode import unidecode
+except ImportErrror:
+    pass
+
 
 def get_semantic_types(path, headers):
     sem_types = {}
@@ -33,7 +40,7 @@ def get_mrconso_iterator(path, headers):
 
 
 def extract_from_mrconso(
-        mrconso_path, mrsty_path,
+        mrconso_path, mrsty_path, opts,
         mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
 
     start = time.time()
@@ -60,23 +67,26 @@ def extract_from_mrconso(
             )
             print(status)
 
-        concept_text = content['str'].strip().lower()
-        cui = content['cui']
+        concept_text = content['str'].strip()
 
-        if (cui, concept_text) in processed:
+        if opts.lowercase:
+            concept_text = concept_text.lower()
+
+        if opts.normalize_unicode:
+            concept_text = unidecode(concept_text)
+
+        if concept_text in processed:
             continue
         else:
-            processed.add((cui, concept_text))
+            processed.add(concept_text)
 
-        yield (concept_text, cui, sem_types[cui])
+        yield (concept_text, content['cui'], sem_types[content['cui']])
 
 
 def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
     # Create destination directories for the two databases
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
-
-    start = time.time()
 
     ss_db = SimstringDBWriter(simstring_dir)
 
@@ -88,10 +98,27 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
 
 
 def driver(opts):
+    if opts.normalize_unicode:
+        try:
+            unidecode
+        except NameError:
+            err = ('`unidecode` is needed for unicode normalization'
+                   'please install it via the `[sudo] pip install '
+                   'unidecode` command.')
+            print(err, file=sys.stderr)
+            exit(1)
+
+        flag_fp = os.path.join(opts.destination_path, 'normalize-unicode.flag')
+        open(flag_fp, 'w').close()
+
+    if opts.lowercase:
+        flag_fp = os.path.join(opts.destination_path, 'lowercase.flag')
+        open(flag_fp, 'w').close()
+
     mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
     mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.RRF')
 
-    mrconso_iterator = extract_from_mrconso(mrconso_path, mrsty_path)
+    mrconso_iterator = extract_from_mrconso(mrconso_path, mrsty_path, opts)
 
     simstring_dir = os.path.join(opts.destination_path, 'umls-simstring.db')
     cuisty_dir = os.path.join(opts.destination_path, 'cui-semtypes.db')
@@ -99,6 +126,7 @@ def driver(opts):
     parse_and_encode_ngrams(mrconso_iterator, simstring_dir, cuisty_dir)
 
     print('Completed!')
+
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
@@ -109,7 +137,16 @@ if __name__ == '__main__':
     )
     ap.add_argument(
         'destination_path',
-        help='Location where the necessary QuickUMLS files are installed')
+        help='Location where the necessary QuickUMLS files are installed'
+    )
+    ap.add_argument(
+        '-L', '--lowercase', action='store_true',
+        help='Consider only lowercase version of tokens'
+    )
+    ap.add_argument(
+        '-U', '--normalize-unicode', action='store_true',
+        help='Normalize unicode strings to their closest ASCII representation'
+    )
     opts = ap.parse_args()
 
-    driver(opts)
+driver(opts)
