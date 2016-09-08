@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import codecs
+import shutil
 import argparse
 
 # project modules
@@ -100,6 +101,27 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
 
 
 def driver(opts):
+    if not os.path.exists(opts.destination_path):
+        msg = ('Directory "{}" does not exists; should I create it? [y/N] '
+               ''.format(opts.destination_path))
+        create = input(msg).lower().strip() == 'y'
+        if create:
+            os.mkdir(opts.destination_path)
+        else:
+            print('Aborting.')
+            exit(1)
+
+    if len(os.listdir(opts.destination_path)) > 0:
+        msg = ('Directory "{}" is not empty; should I empty it? [y/N] '
+               ''.format(opts.destination_path))
+        empty = input(msg).lower().strip() == 'y'
+        if empty:
+            shutil.rmtree(opts.destination_path)
+            os.mkdir(opts.destination_path)
+        else:
+            print('Aborting.')
+            exit(1)
+
     if opts.normalize_unicode:
         try:
             unidecode
