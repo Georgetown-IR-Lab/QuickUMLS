@@ -40,7 +40,7 @@ def get_mrconso_iterator(path, headers):
 
 
 def extract_from_mrconso(
-        mrconso_path, mrsty_kpath, opts,
+        mrconso_path, mrsty_path, opts,
         mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
 
     start = time.time()
@@ -69,6 +69,7 @@ def extract_from_mrconso(
 
         concept_text = content['str'].strip()
         cui = content['cui']
+        preferred = 1 if content['ispref'] else 0
 
         if opts.lowercase:
             concept_text = concept_text.lower()
@@ -81,7 +82,7 @@ def extract_from_mrconso(
         else:
             processed.add((cui, concept_text))
 
-        yield (concept_text, cui, sem_types[cui])
+        yield (concept_text, cui, sem_types[cui], preferred)
 
 
 def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
@@ -93,9 +94,9 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
 
     cuisty_db = CuiSemTypesDB(cuisty_dir)
 
-    for i, (term, cui, stys) in enumerate(extracted_it, start=1):
+    for i, (term, cui, stys, preferred) in enumerate(extracted_it, start=1):
         ss_db.insert(term)
-        cuisty_db.insert(term, cui, stys)
+        cuisty_db.insert(term, cui, stys, preferred)
 
 
 def driver(opts):
