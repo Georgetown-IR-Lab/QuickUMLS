@@ -92,11 +92,15 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
     mkdir(cuisty_dir)
 
     ss_db = SimstringDBWriter(simstring_dir)
-
     cuisty_db = CuiSemTypesDB(cuisty_dir)
 
+    simstring_terms = set()
+
     for i, (term, cui, stys, preferred) in enumerate(extracted_it, start=1):
-        ss_db.insert(term)
+        if term not in simstring_terms:
+            ss_db.insert(term)
+            simstring_terms.add(term)
+
         cuisty_db.insert(term, cui, stys, preferred)
 
 
