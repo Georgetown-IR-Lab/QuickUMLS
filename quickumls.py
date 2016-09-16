@@ -4,6 +4,8 @@ from __future__ import (
 
 # built in modules
 import os
+import sys
+import datetime
 
 # installed modules
 import spacy
@@ -23,8 +25,10 @@ class QuickUMLS(object):
             self, quickumls_fp,
             overlapping_criteria='score', threshold=0.7, window=5,
             similarity_name='jaccard', min_match_length=3,
-            accepted_semtypes=constants.ACCEPTED_SEMTYPES):
+            accepted_semtypes=constants.ACCEPTED_SEMTYPES,
+            verbose=False):
 
+        self.verbose = verbose
         valid_criteria = {'length', 'score'}
         err_msg = ('"{}" is not a valid overlapping_criteria. Choose '
                    'between {}'.format(
@@ -281,6 +285,20 @@ class QuickUMLS(object):
                 span = parsed[i:j]
                 yield (span.start_char, span.end_char, span.text)
 
+    def _print_verbose_status(self, parsed, matches):
+        if not self.verbose:
+            return False
+
+        print(
+            '[{}] {:,} extracted from {:,} tokens'.format(
+                datetime.datetime.now().isoformat(),
+                sum(len(match_group) for match_group in matches),
+                len(parsed)
+            ),
+            file=sys.stderr
+        )
+        return True
+
     def match(self, text, best_match=True, ignore_syntax=False):
         parsed = self.nlp(u'{}'.format(text))
 
@@ -292,7 +310,8 @@ class QuickUMLS(object):
         matches = self._get_all_matches(ngrams)
 
         if best_match:
-            final_matches_subset = self._select_terms(matches)
-            return final_matches_subset
-        else:
-            return matches
+            matches = self._select_terms(matches)
+
+        self._print_verbose_status(parsed, matches)
+
+        return matches
