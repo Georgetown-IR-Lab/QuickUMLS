@@ -69,6 +69,9 @@ class QuickUMLS(object):
         self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
         self.nlp = spacy.load('en')
 
+    def get_info(self):
+        return self.info
+
     @property
     def info(self):
         # useful for caching of respnses
