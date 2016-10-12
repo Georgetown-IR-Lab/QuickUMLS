@@ -72,6 +72,9 @@ class QuickUMLS(object):
     def get_info(self):
         return self.info
 
+    def get_accepted_semtypes(self):
+        return self.accepted_semtypes
+
     @property
     def info(self):
         # useful for caching of respnses
