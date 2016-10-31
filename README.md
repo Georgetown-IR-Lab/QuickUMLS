@@ -19,7 +19,7 @@ This project should be compatible with both Python 2 and 3 and run on any UNIX s
 #### To get the System Running
 
 1. Download and compile Simstring by running `bash setup_simstring.sh <python_version>`, where `<python_version>` is either "`2`" or "`3`".
-2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast is the drive where UMLS and QuickUMLS files should be stored.
+2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast is the drive where UMLS and QuickUMLS files are stored.
 
 ## APIs
 
@@ -32,7 +32,7 @@ A QuickUMLS object can be instantiated as follows:
 
 Where:
 
-- `quickumls_fp` is the directory where the QuickUmls data files are installed.
+- `quickumls_fp` is the directory where the QuickUMLS data files are installed.
 - `overlapping_criteria` (default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
 - `threshold` (default: 0.7) is the minimum similarity value between strings.
 - `similarity_name` (default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
