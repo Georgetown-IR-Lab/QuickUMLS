@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Checks if python version has been provided
 if [[ -z "$1" ]]
 then
