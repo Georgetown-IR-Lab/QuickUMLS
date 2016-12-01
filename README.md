@@ -1,4 +1,4 @@
-**We recommend to download the latest tested version form the [release section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**
+**We recommend to download the latest tested version form the [release section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
 
 # QuickUMLS
 
@@ -12,9 +12,10 @@ This project should be compatible with both Python 2 and 3 and run on any UNIX s
 
 #### Before Starting
 
-1. This software requires all packages listed in the requirements.txt file. You can install all of them by running `pip install -r requirements.txt`.
-2. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy.en.download`.
-3. This system requires you to have a valid UMLS installation on disk. The installation can be remove once the system has been initialized.
+1. Make sure that your Python installation include C headers (e.g., on Ubuntu, make sure `python3-dev` or `python-dev` are installed).
+2. This software requires all packages listed in the requirements.txt file. You can install all of them by running `pip install -r requirements.txt`.
+3. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy.en.download`.
+4. This system requires you to have a valid UMLS installation on disk. The installation can be remove once the system has been initialized.
 
 #### To get the System Running
 
