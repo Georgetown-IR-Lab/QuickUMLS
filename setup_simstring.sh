@@ -10,11 +10,11 @@ if [[ ! -z "$2" ]]
 then
     RELEASE_VERSION="$2"
 else
-    RELEASE_VERSION="v1.1.1"
+    RELEASE_VERSION="1.1.2"
 fi
-RELEASE_FILENAME="simstring_$RELEASE_VERSION.tar.gz"
-RELEASE_URL="https://github.com/Georgetown-IR-Lab/simstring/releases/download/$RELEASE_VERSION/$RELEASE_FILENAME"
+RELEASE_FILENAME="${RELEASE_VERSION}.tar.gz"
 
+RELEASE_URL="https://github.com/Georgetown-IR-Lab/simstring/archive/${RELEASE_FILENAME}"
 echo $RELEASE_URL
 
 # check if url returns 400 or 500 status
@@ -52,21 +52,26 @@ curl -O -L $RELEASE_URL
 echo "Unpacking Simstring..."
 tar -xf $RELEASE_FILENAME
 rm -rf $RELEASE_FILENAME
+RELEASE_FOLDER="simstring-${RELEASE_VERSION}"
 
 echo "Making Simstring..."
-cd "simstring"
+cd "${RELEASE_FOLDER}"
 if [[ "$PYTHON_VERSION" == "2" ]]
 then
-    bash "install_python.sh"
+    python setup.py build_ext --inplace
 else
-    bash "install_python3.sh"
+    python3 setup.py build_ext --inplace
 fi
 
 # install in the right location
 echo "Installing..."
 cd ..
-cp -R "simstring/release" .
-rm -rf "simstring"
-mv "release" "simstring"
-touch "simstring/__init__.py"
+mkdir 'simstring'
+touch 'simstring/__init__.py'
+cp ${RELEASE_FOLDER}/_*.so simstring/
+cp ${RELEASE_FOLDER}/simstring.py simstring/simstring.py
+
+# remove remaining files
+rm -rf "${RELEASE_FOLDER}"
+
 echo "Done!"
