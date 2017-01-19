@@ -1,10 +1,8 @@
 **We recommend to download the latest tested version form the [release section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
 
-# QuickUMLS
-
 QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomedical concept extraction from medical text.
 It takes advantage of [Simstring](http://www.chokkan.org/software/simstring/) (Okazaki and Tsujii, 2010) for approximate string matching.
-For more details on how QuickUMLS works, we remand to our paper.
+For more details on how QuickUMLS works, we remand to [our paper](http://ir.cs.georgetown.edu/downloads/quickumls.pdf).
 
 This project should be compatible with both Python 2 and 3 and run on any UNIX system (sorry, no Windows support). **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
 

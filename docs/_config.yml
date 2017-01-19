@@ -1,1 +1,5 @@
 theme: jekyll-theme-minimal
+name: QuickUMLS
+description: Fast, unsupervised tool for medical concept extraction.
+author: Luca Soldaini and Nazli Goharian
+author_email: luca@ir.cs.georgetown.edu
