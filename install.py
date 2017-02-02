@@ -109,8 +109,9 @@ def driver(opts):
         msg = ('Directory "{}" does not exists; should I create it? [y/N] '
                ''.format(opts.destination_path))
         create = input(msg).lower().strip() == 'y'
+
         if create:
-            os.mkdir(opts.destination_path)
+            os.makedirs(opts.destination_path)
         else:
             print('Aborting.')
             exit(1)
