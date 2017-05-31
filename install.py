@@ -29,12 +29,12 @@ def get_semantic_types(path, headers):
     return sem_types
 
 
-def get_mrconso_iterator(path, headers):
+def get_mrconso_iterator(path, headers, lang='ENG'):
     with codecs.open(path, encoding='utf-8') as f:
         for i, ln in enumerate(f):
             content = dict(zip(headers, ln.strip().split('|')))
 
-            if content['lat'] != 'ENG':
+            if content['lat'] != lang:
                 continue
 
             yield content
@@ -52,7 +52,9 @@ def extract_from_mrconso(
 
     start = time.time()
 
-    mrconso_iterator = get_mrconso_iterator(mrconso_path, mrconso_header)
+    mrconso_iterator = get_mrconso_iterator(
+        mrconso_path, mrconso_header, opts.language
+    )
 
     total = countlines(mrconso_path)
 
@@ -174,6 +176,10 @@ if __name__ == '__main__':
     )
     ap.add_argument(
         '-U', '--normalize-unicode', action='store_true',
+        help='Normalize unicode strings to their closest ASCII representation'
+    )
+    ap.add_argument(
+        '-E', '--language', default='ENG', choices=constants.LANGUAGES,
         help='Normalize unicode strings to their closest ASCII representation'
     )
     opts = ap.parse_args()
