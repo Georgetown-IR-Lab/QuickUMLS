@@ -1,4 +1,4 @@
-**We recommend to download the latest tested version form the [release section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
+**We recommend to download the latest tested version from the [releases section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
 
 # QuickUMLS
 
@@ -13,14 +13,19 @@ This project should be compatible with both Python 2 and 3 and run on any UNIX s
 #### Before Starting
 
 1. Make sure that your Python installation include C headers (e.g., on Ubuntu, make sure `python3-dev` or `python-dev` are installed).
-2. This software requires all packages listed in the requirements.txt file. You can install all of them by running `pip install -r requirements.txt`.
+2. This software requires all packages listed in the `requirements.txt` file. You can install all of them by running `pip install -r requirements.txt`.
 3. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy.en.download`.
 4. This system requires you to have a valid UMLS installation on disk. The installation can be remove once the system has been initialized.
 
-#### To get the System Running
+#### How To get the System Initialized
 
 1. Download and compile Simstring by running `bash setup_simstring.sh <python_version>`, where `<python_version>` is either "`2`" or "`3`".
-2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast is the drive where UMLS and QuickUMLS files are stored.
+2. Initialize the system by running `python install.py <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast the CPU and the drive where UMLS and QuickUMLS files are stored are (on a system with a Intel i7 6700K CPU and a 7200RPM hard drive, initialization takes 8.5 minutes).
+
+`install.py` supports the following optional arguments:
+- `-L` / `--lowercase`: if used, all concept terms are folded to lowercase before being processed. This option typically increases recall, but it might reduce precision;
+- `-U` / `--normalize-unicode`: if used, expressions with non-ASCII characters are converted to the closest combination of ASCII characters.
+- `-E` / `--language`: Specify the language to consider for UMLS concepts; by default, English is used. For a complete list of languages, please see [this table provided by NLM](https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html#LAT).
 
 ## APIs
 
@@ -34,11 +39,11 @@ A QuickUMLS object can be instantiated as follows:
 Where:
 
 - `quickumls_fp` is the directory where the QuickUMLS data files are installed.
-- `overlapping_criteria` (default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
-- `threshold` (default: 0.7) is the minimum similarity value between strings.
-- `similarity_name` (default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
-- `window` (default: 5) is the maximum number of tokens to consider for matching.s
-- `accepted_semtypes` (default: see `constants.py`) is the set of UMLS semantic types concepts should belong to. Semantic types are identified by the letter "T" followed by three numbers (e.g., "T131", which identifies the type *"Hazardous or Poisonous Substance"*). See [here](https://metamap.nlm.nih.gov/Docs/SemanticTypes_2013AA.txt) for the full list.
+- `overlapping_criteria` (optional, default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
+- `threshold` (optional, default: 0.7) is the minimum similarity value between strings.
+- `similarity_name` (optional, default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
+- `window` (optional, default: 5) is the maximum number of tokens to consider for matching.s
+- `accepted_semtypes` (optional, default: see `constants.py`) is the set of UMLS semantic types concepts should belong to. Semantic types are identified by the letter "T" followed by three numbers (e.g., "T131", which identifies the type *"Hazardous or Poisonous Substance"*). See [here](https://metamap.nlm.nih.gov/Docs/SemanticTypes_2013AA.txt) for the full list.
 
 To use the matcher, simply call
 
