@@ -45,3 +45,31 @@ UNICODE_DASHES = {
     u'\u3030', u'\u30a0', u'\ufe31', u'\ufe32', u'\ufe58', u'\ufe63',
     u'\uff0d'
 }
+
+LANGUAGES = {
+    'BAQ',  #Basque
+    'CHI',  #Chinese
+    'CZE',  #Czech
+    'DAN',  #Danish
+    'DUT',  #Dutch
+    'ENG',  #English
+    'EST',  #Estonian
+    'FIN',  #Finnish
+    'FRE',  #French
+    'GER',  #German
+    'GRE',  #Greek
+    'HEB',  #Hebrew
+    'HUN',  #Hungarian
+    'ITA',  #Italian
+    'JPN',  #Japanese
+    'KOR',  #Korean
+    'LAV',  #Latvian
+    'NOR',  #Norwegian
+    'POL',  #Polish
+    'POR',  #Portuguese
+    'RUS',  #Russian
+    'SCR',  #Croatian
+    'SPA',  #Spanish
+    'SWE',  #Swedish
+    'TUR',  #Turkish
+}
