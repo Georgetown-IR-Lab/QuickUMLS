@@ -201,8 +201,7 @@ def run_server(served_object, host='localhost',
     print(
         '[{}] server running at {}:{} (press ^C to interrupt)'.format(
             datetime.datetime.now().isoformat(), host, port, server_thread.name
-        ),
-        file=sys.stderr
+        )
     )
 
     # Wait for termination
@@ -211,10 +210,7 @@ def run_server(served_object, host='localhost',
             time.sleep(1)
     except KeyboardInterrupt:
         print(
-            '\n[{}] server stopped'.format(
-                datetime.datetime.now().isoformat()
-            ),
-            file=sys.stderr
+            '\n[{}] server stopped'.format(datetime.datetime.now().isoformat())
         )
 
     # Terminate the server
