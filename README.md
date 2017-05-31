@@ -1,6 +1,6 @@
 **We recommend to download the latest tested version from the [releases section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
 
-**NEW: v.1.2 now includes client/server support!** Start a QuickUMLS server once, avoid loading QuickUMLS each time your experiments run!
+**NEW: v.1.2 now includes client/server support!** Start a QuickUMLS server once, avoid loading QuickUMLS each time your experiments run! See <a href="#client_server">below</a> for more info.
 
 # QuickUMLS
 
@@ -44,7 +44,7 @@ Where:
 - `overlapping_criteria` (optional, default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
 - `threshold` (optional, default: 0.7) is the minimum similarity value between strings.
 - `similarity_name` (optional, default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
-- `window` (optional, default: 5) is the maximum number of tokens to consider for matching.s
+- `window` (optional, default: 5) is the maximum number of tokens to consider for matching.
 - `accepted_semtypes` (optional, default: see `constants.py`) is the set of UMLS semantic types concepts should belong to. Semantic types are identified by the letter "T" followed by three numbers (e.g., "T131", which identifies the type *"Hazardous or Poisonous Substance"*). See [here](https://metamap.nlm.nih.gov/Docs/SemanticTypes_2013AA.txt) for the full list.
 
 To use the matcher, simply call
@@ -56,6 +56,43 @@ matcher.match(text, best_match=True, ignore_syntax=False)
 
 Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2016).
 
+
+<h2 id="client_server">[NEW] Server / Client Support</h2>
+
+Starting with v.1.2, QuickUMLS includes a support for being used in a client-server configuration. That is, you can start one QuickUMLS server, and query it from multiple scripts using a client.
+
+To start the server, run `server.py`:
+
+```bash
+python server.py /path/to/quickumls/files {-P QuickUMLS port} {-H QuickUMLS host} {QuickUMLS options}
+```
+
+Host and port are optional; by default, QuickUMLS runs on `localhost:4645`. You can also pass any QuickUMLS option mentioned above to the server. To obtain a list of options for the server, run `python server.py -h`.
+
+To load the client, import `get_quickumls_client` from `client.py`:
+
+```bash
+from client import get_quickumls_client
+matcher = get_quickumls_client()
+text = "The ulna has dislocated posteriorly from the trochlea of the humerus."
+matcher.match(text, best_match=True, ignore_syntax=False)
+```
+
+The API of the client is the same of a QuickUMLS object.
+
+
+In case you wish to run the server in the background, you can do so as follows:
+
+```bash
+nohup python server.py /path/to/QuickUMLS {server options} > /dev/null 2>&1 & echo $! > nohup.pid
+
+```
+
+When you are done, don't forget to stop the server by running.
+```bash
+kill -9 `cat nohup.pid`
+rm nohup.pid
+```
 
 ## References
 
