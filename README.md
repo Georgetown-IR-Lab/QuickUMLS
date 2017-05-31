@@ -1,5 +1,7 @@
 **We recommend to download the latest tested version from the [releases section](https://github.com/Georgetown-IR-Lab/QuickUMLS/releases)**.
 
+**NEW: v.1.2 now includes client/server support!** Start a QuickUMLS server once, avoid loading QuickUMLS each time your experiments run!
+
 # QuickUMLS
 
 QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomedical concept extraction from medical text.
@@ -32,8 +34,8 @@ This project should be compatible with both Python 2 and 3 and run on any UNIX s
 A QuickUMLS object can be instantiated as follows:
 
 ```python
->>> matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
-                        similarity_name, window, accepted_semtypes)
+matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
+                    similarity_name, window, accepted_semtypes)
 ```
 
 Where:
@@ -48,8 +50,8 @@ Where:
 To use the matcher, simply call
 
 ```python
->>> text = "The ulna has dislocated posteriorly from the trochlea of the humerus."
->>> matcher.match(text, best_match=True, ignore_syntax=False)
+text = "The ulna has dislocated posteriorly from the trochlea of the humerus."
+matcher.match(text, best_match=True, ignore_syntax=False)
 ```
 
 Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2016).
