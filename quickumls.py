@@ -6,6 +6,7 @@ from __future__ import (
 import os
 import sys
 import datetime
+from six import xrange
 
 # installed modules
 import spacy
@@ -29,10 +30,14 @@ class QuickUMLS(object):
             verbose=False):
 
         self.verbose = verbose
+
         valid_criteria = {'length', 'score'}
-        err_msg = ('"{}" is not a valid overlapping_criteria. Choose '
-                   'between {}'.format(
-                        overlapping_criteria, ', '.join(valid_criteria)))
+        err_msg = (
+            '"{}" is not a valid overlapping_criteria. Choose '
+            'between {}'.format(
+                overlapping_criteria, ', '.join(valid_criteria)
+            )
+        )
         assert overlapping_criteria in valid_criteria, err_msg
         self.overlapping_criteria = overlapping_criteria
 
@@ -142,7 +147,7 @@ class QuickUMLS(object):
             token.i for token in sent if not self._is_valid_middle_token(token)
         }
 
-        for i in toolbox.xrange3(sent_length):
+        for i in xrange(sent_length):
             tok = sent[i]
 
             if not self._is_valid_token(tok):
@@ -166,7 +171,7 @@ class QuickUMLS(object):
             ):
                 yield(tok.idx, tok.idx + len(tok), tok.text)
 
-            for j in toolbox.xrange3(i + 1, span_end):
+            for j in xrange(i + 1, span_end):
                 if compensate:
                     compensate = False
                     continue
@@ -286,7 +291,7 @@ class QuickUMLS(object):
 
     def _make_token_sequences(self, parsed):
         for i in range(len(parsed)):
-            for j in toolbox.xrange3(
+            for j in xrange(
                     i + 1, min(i + self.window, len(parsed)) + 1):
                 span = parsed[i:j]
                 yield (span.start_char, span.end_char, span.text)

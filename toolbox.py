@@ -7,6 +7,7 @@ import six
 import unicodedata
 from string import punctuation
 from itertools import takewhile, repeat
+from six import xrange
 
 # installed modules
 import numpy
@@ -66,7 +67,7 @@ def prepare_string_for_db_input(s):
 
 def make_ngrams(s, n):
     s = u'{t}{s}{t}'.format(s=safe_unicode(s), t=('$' * (n - 1)))
-    return (s[i:i+n] for i in xrange3(len(s) - n + 1))
+    return (s[i:i + n] for i in xrange(len(s) - n + 1))
 
 
 def get_similarity(x, y, n, similarity_name):
@@ -122,14 +123,6 @@ class SimpleTokenizer(object):
         ]
 
 
-def xrange3(*args, **kwargs):
-    """xrange in Python 2, range in Python 3"""
-    if six.PY3:
-        return range(*args, **kwargs)
-    else:
-        return xrange(*args, **kwargs)
-
-
 def db_key_encode(term):
     if six.PY2:
         return term
@@ -142,7 +135,7 @@ def countlines(fn):
     http://stackoverflow.com/a/27518377"""
     with open(fn, 'rb') as f:
         bufgen = takewhile(
-            lambda x: x, (f.read(1024*1024) for _ in repeat(None)))
+            lambda x: x, (f.read(1024 * 1024) for _ in repeat(None)))
         ln = sum(buf.count(b'\n') for buf in bufgen)
     return ln
 
