@@ -6,7 +6,7 @@ from __future__ import (
 import os
 import sys
 import datetime
-from six import xrange
+from six.moves import xrange
 
 # installed modules
 import spacy
