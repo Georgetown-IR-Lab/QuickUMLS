@@ -7,7 +7,7 @@ import six
 import unicodedata
 from string import punctuation
 from itertools import takewhile, repeat
-from six import xrange
+from six.moves import xrange
 
 # installed modules
 import numpy
@@ -66,20 +66,22 @@ def prepare_string_for_db_input(s):
 
 
 def make_ngrams(s, n):
-    s = u'{t}{s}{t}'.format(s=safe_unicode(s), t=('$' * (n - 1)))
+    # s = u'{t}{s}{t}'.format(s=safe_unicode(s), t=('$' * (n - 1)))
     return (s[i:i + n] for i in xrange(len(s) - n + 1))
 
 
 def get_similarity(x, y, n, similarity_name):
     X, Y = set(make_ngrams(x, n)), set(make_ngrams(y, n))
+    intersec = len(X.intersection(Y))
+
     if similarity_name == 'dice':
-        return 2 * len(X & Y) / (len(X) + len(Y))
+        return 2 * intersec / (len(X) + len(Y))
     elif similarity_name == 'jaccard':
-        return len(X & Y) / len(X | Y)
+        return intersec / (len(X) + len(Y) - intersec)
     elif similarity_name == 'cosine':
-        return len(X & Y) / numpy.sqrt(len(X) * len(Y))
+        return intersec / numpy.sqrt(len(X) * len(Y))
     elif similarity_name == 'overlap':
-        return len(X & Y)
+        return intersec
     else:
         msg = 'Similarity {} not recognized'.format(similarity_name)
         raise TypeError(msg)
