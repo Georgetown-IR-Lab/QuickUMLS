@@ -16,7 +16,7 @@ This project should be compatible with both Python 2 and 3 and run on any UNIX s
 
 1. Make sure that your Python installation include C headers (e.g., on Ubuntu, make sure `python3-dev` or `python-dev` are installed).
 2. This software requires all packages listed in the `requirements.txt` file. You can install all of them by running `pip install -r requirements.txt`.
-3. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy.en.download`.
+3. Note that, in order to use `spacy`, you are required to download its corpus. You can do that by running `python -m spacy download en`.
 4. This system requires you to have a valid UMLS installation on disk. To install UMLS, you must first obtain a [license](https://uts.nlm.nih.gov/license.html) from the National Library of Medicine; then you should download all UMLS files from [this page](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html); finally, you can install UMLS using the [MetamorphoSys](https://www.nlm.nih.gov/pubs/factsheets/umlsmetamorph.html) tool as [explained in this guide](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html).  The installation can be removed once the system has been initialized.
 
 #### How To get the System Initialized
