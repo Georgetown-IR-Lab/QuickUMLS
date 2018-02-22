@@ -12,7 +12,7 @@ if [[ ! -z "$2" ]]
 then
     RELEASE_VERSION="$2"
 else
-    RELEASE_VERSION="1.1.2"
+    RELEASE_VERSION="1.1.3"
 fi
 RELEASE_FILENAME="${RELEASE_VERSION}.tar.gz"
 
