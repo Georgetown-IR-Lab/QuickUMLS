@@ -7,6 +7,7 @@ import time
 import codecs
 import shutil
 import argparse
+from six.moves import input
 
 # project modules
 from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
