@@ -157,7 +157,7 @@ def driver(opts):
         open(flag_fp, 'w').close()
 
     flag_fp = os.path.join(opts.destination_path, 'language.flag')
-    with open(flag_fp) as f:
+    with open(flag_fp, 'w') as f:
         f.write(opts.language)
 
     mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
