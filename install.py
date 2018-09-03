@@ -15,7 +15,7 @@ from constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES
 
 try:
     from unidecode import unidecode
-except ImportErrror:
+except ImportError:
     pass
 
 
