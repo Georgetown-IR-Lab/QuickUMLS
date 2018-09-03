@@ -79,3 +79,14 @@ LANGUAGES = {
 DOMAIN_SPECIFIC_STOPWORDS = {
     'time'
 }
+
+SPACY_LANGUAGE_MAP = {
+    'ENG': 'es',
+    'GER': 'de',
+    'SPA': 'es',
+    'POR': 'pt',
+    'FRE': 'fr',
+    'ITA': 'it',
+    'DUT': 'nl',
+    'XXX': 'xx'
+}
