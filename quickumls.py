@@ -10,6 +10,7 @@ from six.moves import xrange
 
 # installed modules
 import spacy
+import nltk
 from unidecode import unidecode
 
 # project modules
@@ -64,6 +65,34 @@ class QuickUMLS(object):
             os.path.join(quickumls_fp, 'normalize-unicode.flag')
         )
 
+        language_fp = os.path.join(quickumls_fp, 'language.flag')
+
+        # download stopwords if necessary
+        try:
+            nltk.corpus.stopwords.words()
+        except LookupError:
+            nltk.download('stopwords')
+
+        if os.path.exists(language_fp):
+            with open(language_fp) as f:
+                self.language_flag = f.read().strip()
+        else:
+            self.language_flag = 'ENG'
+
+        if self.language_flag not in constants.LANGUAGES:
+            raise ValueError('Language "{}" not supported'.format(self.language_flag))
+        elif constants.LANGUAGES[self.language_flag] is None:
+            self._stopwords = set()
+            spacy_lang = 'xx'
+        else:
+            self._stopwords = set(
+                nltk.corpus.stopwords.words(constants.LANGUAGES[self.language_flag])
+            )
+            spacy_lang = constants.SPACY_LANGUAGE_MAP[self.language_flag]
+
+        # domain specific stopwords
+        self._stopwords = self._stopwords.union(constants.DOMAIN_SPECIFIC_STOPWORDS)
+
         self._info = None
 
         self.accepted_semtypes = accepted_semtypes
@@ -72,7 +101,18 @@ class QuickUMLS(object):
             simstring_fp, similarity_name, threshold
         )
         self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
-        self.nlp = spacy.load('en')
+        try:
+            self.nlp = spacy.load(spacy_lang)
+        except OSError:
+            msg = (
+                'Model for language "{}" is not downloaded. Please '
+                'run "python -m spacy download {}" before launching '
+                'QuickUMLS'
+            ).format(
+                self.language_flag,
+                constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
+            )
+            raise OSError(msg)
 
     def get_info(self):
         return self.info
@@ -111,7 +151,7 @@ class QuickUMLS(object):
         )
 
     def _is_stop_term(self, tok):
-        return tok.is_stop or tok.lemma_ == 'time'
+        return tok.text in self._stopwords
 
     def _is_valid_end_token(self, tok):
         return not(

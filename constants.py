@@ -46,31 +46,47 @@ UNICODE_DASHES = {
     u'\uff0d'
 }
 
+# language with missing value
+# will not have support for tokenization
 LANGUAGES = {
-    'BAQ',  # Basque
-    'CHI',  # Chinese
-    'CZE',  # Czech
-    'DAN',  # Danish
-    'DUT',  # Dutch
-    'ENG',  # English
-    'EST',  # Estonian
-    'FIN',  # Finnish
-    'FRE',  # French
-    'GER',  # German
-    'GRE',  # Greek
-    'HEB',  # Hebrew
-    'HUN',  # Hungarian
-    'ITA',  # Italian
-    'JPN',  # Japanese
-    'KOR',  # Korean
-    'LAV',  # Latvian
-    'NOR',  # Norwegian
-    'POL',  # Polish
-    'POR',  # Portuguese
-    'RUS',  # Russian
-    'SCR',  # Croatian
-    'SPA',  # Spanish
-    'SWE',  # Swedish
-    'TUR',  # Turkish
+    'BAQ': None,           # Basque
+    'CHI': None,           # Chinese
+    'CZE': None,           # Czech
+    'DAN': 'danish',       # Danish
+    'DUT': 'dutch',        # Dutch
+    'ENG': 'english',      # English
+    'EST': None,           # Estonian
+    'FIN': 'finnish',      # Finnish
+    'FRE': 'french',       # French
+    'GER': 'german',       # German
+    'GRE': 'greek',        # Greek
+    'HEB': None,           # Hebrew
+    'HUN': 'hungarian',    # Hungarian
+    'ITA': 'italian',      # Italian
+    'JPN': None,           # Japanese
+    'KOR': None,           # Korean
+    'LAV': None,           # Latvian
+    'NOR': 'norwegian',    # Norwegian
+    'POL': 'polish',       # Polish
+    'POR': 'portoguese',   # Portuguese
+    'RUS': 'russian',      # Russian
+    'SCR': None,           # Croatian
+    'SPA': 'spanish',      # Spanish
+    'SWE': 'swedish',      # Swedish
+    'TUR': 'turkish',      # Turkish
 }
 
+DOMAIN_SPECIFIC_STOPWORDS = {
+    'time'
+}
+
+SPACY_LANGUAGE_MAP = {
+    'ENG': 'es',
+    'GER': 'de',
+    'SPA': 'es',
+    'POR': 'pt',
+    'FRE': 'fr',
+    'ITA': 'it',
+    'DUT': 'nl',
+    'XXX': 'xx'
+}
