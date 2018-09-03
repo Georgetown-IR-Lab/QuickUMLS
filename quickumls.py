@@ -308,7 +308,7 @@ class QuickUMLS(object):
 
     @staticmethod
     def _select_longest(match):
-        return (match[0]['similarity'], (match[0]['end'] - match[0]['start']))
+        return ((match[0]['end'] - match[0]['start']), match[0]['similarity'])
 
     def _select_terms(self, matches):
         sort_func = (

@@ -81,7 +81,7 @@ DOMAIN_SPECIFIC_STOPWORDS = {
 }
 
 SPACY_LANGUAGE_MAP = {
-    'ENG': 'es',
+    'ENG': 'en',
     'GER': 'de',
     'SPA': 'es',
     'POR': 'pt',
