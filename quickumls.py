@@ -267,6 +267,8 @@ class QuickUMLS(object):
                         n=self.ngram_length,
                         similarity_name=self.similarity_name
                     )
+                    if match_similarity == 0:
+                        continue
 
                     if not self._is_ok_semtype(semtypes):
                         continue
