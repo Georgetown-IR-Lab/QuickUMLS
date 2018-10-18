@@ -71,6 +71,11 @@ def make_ngrams(s, n):
 
 
 def get_similarity(x, y, n, similarity_name):
+    if len(x) == 0 or len(y) == 0:
+        # we define similarity between two strings
+        # to be 0 if any of the two is empty.
+        return 0.
+
     X, Y = set(make_ngrams(x, n)), set(make_ngrams(y, n))
     intersec = len(X.intersection(Y))
 
