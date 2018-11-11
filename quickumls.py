@@ -83,7 +83,7 @@ class QuickUMLS(object):
             raise ValueError('Language "{}" not supported'.format(self.language_flag))
         elif constants.LANGUAGES[self.language_flag] is None:
             self._stopwords = set()
-            spacy_lang = 'xx'
+            spacy_lang = 'XXX'
         else:
             self._stopwords = set(
                 nltk.corpus.stopwords.words(constants.LANGUAGES[self.language_flag])
