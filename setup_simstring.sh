@@ -12,7 +12,7 @@ if [[ ! -z "$2" ]]
 then
     RELEASE_VERSION="$2"
 else
-    RELEASE_VERSION="1.1.3"
+    RELEASE_VERSION="1.1.4"
 fi
 RELEASE_FILENAME="${RELEASE_VERSION}.tar.gz"
 
@@ -53,6 +53,7 @@ curl -O -L $RELEASE_URL
 
 echo "Unpacking Simstring..."
 tar -xf $RELEASE_FILENAME
+
 rm -rf $RELEASE_FILENAME
 RELEASE_FOLDER="simstring-${RELEASE_VERSION}"
 
@@ -70,7 +71,17 @@ echo "Installing..."
 cd ..
 mkdir 'simstring'
 touch 'simstring/__init__.py'
-cp ${RELEASE_FOLDER}/_*.so simstring/
+
+PLATFORM="$(uname -s)"
+
+if [[ $PLATFORM == *"CYGWIN"* || $PLATFORM == *"MINGW"* ]]; then
+    # we are on a NT system, so building creates DLLs
+    cp ${RELEASE_FOLDER}/_*.dll simstring/
+else
+    # *nix system, so bulding stuff createsd SOs 
+    cp ${RELEASE_FOLDER}/_*.so simstring/
+fi
+
 cp ${RELEASE_FOLDER}/simstring.py simstring/simstring.py
 
 # remove remaining files
