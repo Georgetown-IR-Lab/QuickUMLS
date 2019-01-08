@@ -336,6 +336,10 @@ class QuickUMLS(object):
             for j in xrange(
                     i + 1, min(i + self.window, len(parsed)) + 1):
                 span = parsed[i:j]
+                
+                if not self._is_longer_than_min(span):
+                    continue
+                
                 yield (span.start_char, span.end_char, span.text)
 
     def _print_verbose_status(self, parsed, matches):
