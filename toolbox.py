@@ -67,6 +67,7 @@ def prepare_string_for_db_input(s):
 
 def make_ngrams(s, n):
     # s = u'{t}{s}{t}'.format(s=safe_unicode(s), t=('$' * (n - 1)))
+    n = len(s) if len(s) < n else n
     return (s[i:i + n] for i in xrange(len(s) - n + 1))
 
 
