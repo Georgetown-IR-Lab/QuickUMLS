@@ -75,7 +75,7 @@ def extract_from_mrconso(
 
         concept_text = content['str'].strip()
         cui = content['cui']
-        preferred = 1 if content['ispref'] else 0
+        preferred = 1 if content['ispref'] == 'Y' else 0
 
         if opts.lowercase:
             concept_text = concept_text.lower()
