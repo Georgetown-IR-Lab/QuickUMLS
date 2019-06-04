@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
-from core import QuickUMLS
-from network import run_server
+from .core import QuickUMLS
+from .network import run_server
 
 
 def run_quickumls_server(opts):
