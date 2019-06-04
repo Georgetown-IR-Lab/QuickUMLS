@@ -10,8 +10,8 @@ import argparse
 from six.moves import input
 
 # project modules
-from toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
-from constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES
+from .toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
+from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES
 
 try:
     from unidecode import unidecode
@@ -116,7 +116,36 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
         cuisty_db.insert(term, cui, stys, preferred)
 
 
-def driver(opts):
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        'umls_installation_path',
+        help=('Location of UMLS installation files (`MRCONSO.RRF` and '
+              '`MRSTY.RRF` files)')
+    )
+    ap.add_argument(
+        'destination_path',
+        help='Location where the necessary QuickUMLS files are installed'
+    )
+    ap.add_argument(
+        '-L', '--lowercase', action='store_true',
+        help='Consider only lowercase version of tokens'
+    )
+    ap.add_argument(
+        '-U', '--normalize-unicode', action='store_true',
+        help='Normalize unicode strings to their closest ASCII representation'
+    )
+    ap.add_argument(
+        '-E', '--language', default='ENG', choices=LANGUAGES,
+        help='Extract concepts of the specified language'
+    )
+    opts = ap.parse_args()
+    return opts
+
+
+def main():
+    opts = parse_args()
+
     if not os.path.exists(opts.destination_path):
         msg = ('Directory "{}" does not exists; should I create it? [y/N] '
                ''.format(opts.destination_path))
@@ -172,28 +201,4 @@ def driver(opts):
 
 
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser()
-    ap.add_argument(
-        'umls_installation_path',
-        help=('Location of UMLS installation files (`MRCONSO.RRF` and '
-              '`MRSTY.RRF` files)')
-    )
-    ap.add_argument(
-        'destination_path',
-        help='Location where the necessary QuickUMLS files are installed'
-    )
-    ap.add_argument(
-        '-L', '--lowercase', action='store_true',
-        help='Consider only lowercase version of tokens'
-    )
-    ap.add_argument(
-        '-U', '--normalize-unicode', action='store_true',
-        help='Normalize unicode strings to their closest ASCII representation'
-    )
-    ap.add_argument(
-        '-E', '--language', default='ENG', choices=LANGUAGES,
-        help='Extract concepts of the specified language'
-    )
-    opts = ap.parse_args()
-
-driver(opts)
+    main()
