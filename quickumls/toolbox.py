@@ -14,7 +14,10 @@ import numpy
 import leveldb
 
 # project imports
-import simstring
+try:
+    import simstring
+except ImportError:
+    from quickumls_simstring import simstring
 
 
 # Python version specific imports
