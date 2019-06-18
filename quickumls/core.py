@@ -14,12 +14,8 @@ import nltk
 from unidecode import unidecode
 
 # project modules
-try:
-    import toolbox
-    import constants
-except ImportError:
-    from . import toolbox
-    from . import constants
+from . import toolbox
+from . import constants
 
 
 class QuickUMLS(object):
@@ -32,25 +28,25 @@ class QuickUMLS(object):
             accepted_semtypes=constants.ACCEPTED_SEMTYPES,
             verbose=False):
         """Instantiate QuickUMLS object
-        
+
             This is the main interface through which text can be processed.
 
         Args:
             quickumls_fp (str): Path to which QuickUMLS was installed
-            overlapping_criteria (str, optional): 
-                    One of "score" or "length". Choose how results are ranked. 
+            overlapping_criteria (str, optional):
+                    One of "score" or "length". Choose how results are ranked.
                     Choose "score" for best matching score first or "length" for longest match first.. Defaults to 'score'.
             threshold (float, optional): Minimum similarity between strings. Defaults to 0.7.
             window (int, optional): Maximum amount of tokens to consider for matching. Defaults to 5.
-            similarity_name (str, optional): One of "dice", "jaccard", "cosine", or "overlap". 
+            similarity_name (str, optional): One of "dice", "jaccard", "cosine", or "overlap".
                     Similarity measure to be used. Defaults to 'jaccard'.
             min_match_length (int, optional): TODO: ??. Defaults to 3.
             accepted_semtypes (List[str], optional): Set of UMLS semantic types concepts should belong to.
                 Semantic types are identified by the letter "T" followed by three numbers
-                (e.g., "T131", which identifies the type "Hazardous or Poisonous Substance"). 
+                (e.g., "T131", which identifies the type "Hazardous or Poisonous Substance").
                 Defaults to constants.ACCEPTED_SEMTYPES.
             verbose (bool, optional): TODO:??. Defaults to False.
-        
+
         Raises:
             ValueError: Raises a ValueError if QuickUMLS was installed for a language that is not currently supported TODO: verify this?
             OSError: Raises an OSError if the required Spacy model was not installed.
@@ -142,7 +138,7 @@ class QuickUMLS(object):
 
     def get_info(self):
         """Computes a summary of the matcher options.
-        
+
         Returns:
             Dict: Dictionary containing information on the QuicUMLS instance.
         """
@@ -372,10 +368,10 @@ class QuickUMLS(object):
             for j in xrange(
                     i + 1, min(i + self.window, len(parsed)) + 1):
                 span = parsed[i:j]
-                
+
                 if not self._is_longer_than_min(span):
                     continue
-                
+
                 yield (span.start_char, span.end_char, span.text)
 
     def _print_verbose_status(self, parsed, matches):
@@ -396,18 +392,18 @@ class QuickUMLS(object):
         """Perform UMLS concept resolution for the given string.
 
         [extended_summary]
-        
+
         Args:
             text (str): Text on which to run the algorithm
 
             best_match (bool, optional): Whether to return only the top match or all overlapping candidates. Defaults to True.
             ignore_syntax (bool, optional): Wether to use the heuristcs introduced in the paper (Soldaini and Goharian, 2016). TODO: clarify,. Defaults to False.
-        
+
         Returns:
             List: List of all matches in the text
             TODO: Describe format
         """
-        
+
         parsed = self.nlp(u'{}'.format(text))
 
         if ignore_syntax:
