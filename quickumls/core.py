@@ -119,10 +119,6 @@ class QuickUMLS(object):
 
         self.accepted_semtypes = accepted_semtypes
 
-        self.ss_db = toolbox.SimstringDBReader(
-            simstring_fp, similarity_name, threshold
-        )
-        self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
         try:
             self.nlp = spacy.load(spacy_lang)
         except OSError:
@@ -135,6 +131,11 @@ class QuickUMLS(object):
                 constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
             )
             raise OSError(msg)
+        
+        self.ss_db = toolbox.SimstringDBReader(
+            simstring_fp, similarity_name, threshold
+        )
+        self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
 
     def get_info(self):
         """Computes a summary of the matcher options.
