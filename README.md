@@ -51,7 +51,7 @@ matcher.match(text, best_match=True, ignore_syntax=False)
 Set `best_match` to `False` if you want to return overlapping candidates, `ignore_syntax` to `True` to disable all heuristics introduced in (Soldaini and Goharian, 2016).
 
 
-<h2 id="client_server">[NEW] Server / Client Support</h2>
+## Server / Client Support
 
 Starting with v.1.2, QuickUMLS includes a support for being used in a client-server configuration. That is, you can start one QuickUMLS server, and query it from multiple scripts using a client.
 
