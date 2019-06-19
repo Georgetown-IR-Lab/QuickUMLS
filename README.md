@@ -12,8 +12,6 @@ This project should be compatible with both Python 3 and run on any UNIX system 
 
 ## Installation
 
-#### Before You Start
-
 1. **Obtain a UMLS installation** This tool requires you to have a valid UMLS installation on disk. To install UMLS, you must first obtain a [license](https://uts.nlm.nih.gov/license.html) from the National Library of Medicine; then you should download all UMLS files from [this page](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html); finally, you can install UMLS using the [MetamorphoSys](https://www.nlm.nih.gov/pubs/factsheets/umlsmetamorph.html) tool as [explained in this guide](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html).  The installation can be removed once the system has been initialized.
 2. **Install QuickUMLS**: You can do so by either running `pip install quickumls` or `python setup.py install`. On macOS, using anaconda is **strongly recommended**<sup>†</sup>. 
 3. **Obrain a SpaCy corpus**: After you install QuickUMLS and its dependencies, you should be able to do so by running `python -m spacy download en`.
