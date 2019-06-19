@@ -1,11 +1,7 @@
-try:
-    from quickumls import QuickUMLS
-    from network import run_server
-except ImportError:
-    from .quickumls import QuickUMLS
-    from .MinimalServer import run_server
-
 from argparse import ArgumentParser
+
+from .core import QuickUMLS
+from .network import run_server
 
 
 def run_quickumls_server(opts):
@@ -22,7 +18,7 @@ def run_quickumls_server(opts):
     run_server(matcher, host=opts.host, port=opts.port, buffersize=4096)
 
 
-if __name__ == '__main__':
+def parse_args():
     ap = ArgumentParser(
         prog='QuickUMLS server',
         description=(
@@ -76,5 +72,13 @@ if __name__ == '__main__':
         help='return verbose information while running'
     )
 
-    opts = ap.parse_args()
+    return ap.parse_args()
+
+
+def main():
+    opts = parse_args()
     run_quickumls_server(opts)
+
+
+if __name__ == '__main__':
+    main()

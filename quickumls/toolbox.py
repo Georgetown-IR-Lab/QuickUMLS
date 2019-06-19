@@ -14,10 +14,8 @@ import numpy
 import leveldb
 
 # project imports
-try:
-    from simstring import simstring
-except ImportError:
-    from .simstring import simstring
+from quickumls_simstring import simstring
+
 
 # Python version specific imports
 if six.PY2:
