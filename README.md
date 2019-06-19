@@ -1,6 +1,4 @@
-**NEW: v.1.3 is pip-ready!** You can now install QuickUMLS through a simple `pip install quickumls`.
-
-**NEW: v.1.2 now includes client/server support!** Start a QuickUMLS server once, avoid loading QuickUMLS each time your experiments run! See <a href="#client_server">below</a> for more info.
+[**NEW: v.1.3 is pip-ready!**](https://media.giphy.com/media/BlVnrxJgTGsUw/giphy.gif) You can now install QuickUMLS through a simple `pip install quickumls`.
 
 # QuickUMLS
 
@@ -8,7 +6,7 @@ QuickUMLS (Soldaini and Goharian, 2016) is a tool for fast, unsupervised  biomed
 It takes advantage of [Simstring](http://www.chokkan.org/software/simstring/) (Okazaki and Tsujii, 2010) for approximate string matching.
 For more details on how QuickUMLS works, we remand to our paper.
 
-This project should be compatible with both Python 3 and run on any UNIX system (support for Windows is experimental, please report bugs!). **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
+This project should be compatible with Python 3 (Python 2 is [no longer supported](https://pythonclock.org/)) and run on any UNIX system (support for Windows is experimental, please report bugs!). **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
 
 ## Installation
 
