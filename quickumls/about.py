@@ -4,7 +4,7 @@
 # https://github.com/explosion/spaCy/blob/master/spacy/about.py
 
 __title__ = 'quickumls'
-__version__ = '1.3r3'
+__version__ = '1.3.0r4'
 __author__ = 'Luca Soldaini'
 __email__ = 'luca@ir.cs.georgetown.edu'
 __license__ = 'MIT'

@@ -1,4 +1,4 @@
-[**NEW: v.1.3 is pip-ready!**](https://media.giphy.com/media/BlVnrxJgTGsUw/giphy.gif) You can now install QuickUMLS through a simple `pip install quickumls`.
+[**NEW: v.1.3 is pip-ready!**](https://giphy.com/embed/BlVnrxJgTGsUw) You can now install QuickUMLS through a simple `pip install quickumls`.
 
 # QuickUMLS
 
