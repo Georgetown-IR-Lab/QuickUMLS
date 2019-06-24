@@ -26,7 +26,7 @@ class QuickUMLS(object):
             overlapping_criteria='score', threshold=0.7, window=5,
             similarity_name='jaccard', min_match_length=3,
             accepted_semtypes=constants.ACCEPTED_SEMTYPES,
-            verbose=False):
+            verbose=False, keep_uppercase=False):
         """Instantiate QuickUMLS object
 
             This is the main interface through which text can be processed.
@@ -46,6 +46,12 @@ class QuickUMLS(object):
                 (e.g., "T131", which identifies the type "Hazardous or Poisonous Substance").
                 Defaults to constants.ACCEPTED_SEMTYPES.
             verbose (bool, optional): TODO:??. Defaults to False.
+            keep_uppercase (bool, optional): By default QuickUMLS converts all
+                    uppercase strings to lowercase. This option disables that
+                    functionality, which makes QuickUMLS useful for
+                    distinguishing acronyms from normal words. For this the
+                    database should be installed without the -L option.
+                    Defaults to False.
 
         Raises:
             ValueError: Raises a ValueError if QuickUMLS was installed for a language that is not currently supported TODO: verify this?
@@ -86,6 +92,14 @@ class QuickUMLS(object):
         self.normalize_unicode_flag = os.path.exists(
             os.path.join(quickumls_fp, 'normalize-unicode.flag')
         )
+        self.keep_uppercase = keep_uppercase
+
+        # Check whether data is installed with lowercase flag and QuickUMLS initiated with keeping uppercase words
+        if self.to_lowercase_flag and self.keep_uppercase:
+            raise ValueError('Database is installed with lowercase flag and QuickUMLS is initiated with '
+                             'keep_uppercase flag. This would prevent identifying concepts that contain all uppercase'
+                             'characters. Please reinstall data without --lowercase or run QuickUMLS without'
+                             '--keep_uppercase.')
 
         language_fp = os.path.join(quickumls_fp, 'language.flag')
 
@@ -131,7 +145,7 @@ class QuickUMLS(object):
                 constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
             )
             raise OSError(msg)
-        
+
         self.ss_db = toolbox.SimstringDBReader(
             simstring_fp, similarity_name, threshold
         )
@@ -282,7 +296,7 @@ class QuickUMLS(object):
             # no match is found; so we convert to lowercase;
             # however, this is never needed if the string is lowercased
             # in the step above
-            if not self.to_lowercase_flag and ngram_normalized.isupper():
+            if not self.to_lowercase_flag and ngram_normalized.isupper() and not self.keep_uppercase:
                 ngram_normalized = ngram_normalized.lower()
 
             prev_cui = None
