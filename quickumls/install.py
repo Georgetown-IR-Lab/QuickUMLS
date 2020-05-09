@@ -1,22 +1,26 @@
 from __future__ import unicode_literals, division, print_function
 
 # built in modules
+import argparse
+import codecs
 import os
+from six.moves import input
+import shutil
 import sys
 import time
-import codecs
-import shutil
-import argparse
-from six.moves import input
-
-# project modules
-from .toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
-from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES
-
 try:
     from unidecode import unidecode
 except ImportError:
     pass
+
+
+# third party-dependencies
+import spacy
+
+
+# project modules
+from .toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
+from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
 
 
 def get_semantic_types(path, headers):
@@ -116,6 +120,20 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
         cuisty_db.insert(term, cui, stys, preferred)
 
 
+def install_spacy(lang):
+    """Tries to create a spacy object; if it fails, downloads the dataset"""
+
+    print(f'Determining if SpaCy for language "{lang}" is installed...')
+
+    if lang in SPACY_LANGUAGE_MAP:
+        try:
+            spacy.load(SPACY_LANGUAGE_MAP[lang])
+            print(f'SpaCy is installed and avaliable for {lang}!')
+        except OSError:
+            print(f'SpaCy is not available! Attempting to download and install...')
+            spacy.cli.download(SPACY_LANGUAGE_MAP[lang])
+
+
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -145,6 +163,8 @@ def parse_args():
 
 def main():
     opts = parse_args()
+
+    install_spacy(opts.language)
 
     if not os.path.exists(opts.destination_path):
         msg = ('Directory "{}" does not exists; should I create it? [y/N] '
