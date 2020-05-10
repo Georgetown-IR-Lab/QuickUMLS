@@ -131,6 +131,12 @@ class QuickUMLS(object):
             with open(database_backend_fp) as f:
                 self._database_backend = f.read().strip()
         else:
+            print('[WARNING] This installation was created with QuickUMLS v.1.3 or earlier, '
+                  'which does not support multiple database backends. For now, I\'ll '
+                  'assume that leveldb was used as default, implicit assumption will '
+                  'change in future versions of QuickUMLS. More info here: '
+                  'https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4',
+                  file=sys.stderr)
             self._database_backend = 'leveldb'
 
         # domain specific stopwords

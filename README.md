@@ -1,4 +1,4 @@
-[**NEW: v.1.3 is pip-ready!**](https://giphy.com/embed/BlVnrxJgTGsUw) You can now install QuickUMLS through a simple `pip install quickumls`.
+[**NEW: v.1.4 supports multi- thread and process reads!**](https://giphy.com/embed/BlVnrxJgTGsUw) I've finally added support for [unqlite](https://github.com/coleifer/unqlite-python) as an alternative to leveldb for storage of CUIs and Semantic Types (see #54 for more details). Other than better multi- processing and threading support, unqlite should have better support for unicode.
 
 # QuickUMLS
 
@@ -11,12 +11,12 @@ This project should be compatible with Python 3 (Python 2 is [no longer supporte
 ## Installation
 
 1. **Obtain a UMLS installation** This tool requires you to have a valid UMLS installation on disk. To install UMLS, you must first obtain a [license](https://uts.nlm.nih.gov/license.html) from the National Library of Medicine; then you should download all UMLS files from [this page](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html); finally, you can install UMLS using the [MetamorphoSys](https://www.nlm.nih.gov/pubs/factsheets/umlsmetamorph.html) tool as [explained in this guide](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html).  The installation can be removed once the system has been initialized.
-2. **Install QuickUMLS**: You can do so by either running `pip install quickumls` or `python setup.py install`. On macOS, using anaconda is **strongly recommended**<sup>†</sup>. 
-3. **Obrain a SpaCy corpus**: After you install QuickUMLS and its dependencies, you should be able to do so by running `python -m spacy download en`.
+2. **Install QuickUMLS**: You can do so by either running `pip install quickumls` or `python setup.py install`. On macOS, using anaconda is **strongly recommended**<sup>†</sup>.
 3. **Create a QuickUMLS installation** Initialize the system by running `python -m quickumls.install <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast the CPU and the drive where UMLS and QuickUMLS files are stored are (on a system with a Intel i7 6700K CPU and a 7200 RPM hard drive, initialization takes 8.5 minutes). `python -m quickumls.install` supports the following optional arguments:
     - `-L` / `--lowercase`: if used, all concept terms are folded to lowercase before being processed. This option typically increases recall, but it might reduce precision;
     - `-U` / `--normalize-unicode`: if used, expressions with non-ASCII characters are converted to the closest combination of ASCII characters.
     - `-E` / `--language`: Specify the language to consider for UMLS concepts; by default, English is used. For a complete list of languages, please see [this table provided by NLM](https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html#LAT).
+    - `-d` / `--database-backend`: Specify which database backend to use for QuickUMLS. The two options are `leveldb` and `unqlite`. The former is set as default for compatibility reasons, while the latter support multi-process reading and has better unicode compatibility. More info about differences between the two databases and migration info are available [here](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4).
 
 
 **†**: If the installation fails on macOS when using Anaconda, install `leveldb` first by running `conda install -c conda-forge python-leveldb`.

@@ -280,8 +280,11 @@ class CuiSemTypesDB(object):
 
     def get(self, term):
         term = prepare_string_for_db_input(safe_unicode(term))
+        try:
+            cuis = pickle.loads(self.cui_db_get(db_key_encode(term)))
+        except KeyError:
+            cuis = set()
 
-        cuis = pickle.loads(self.cui_db_get(db_key_encode(term)))
         matches = (
             (
                 cui,
