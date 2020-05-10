@@ -4,9 +4,9 @@
 # https://github.com/explosion/spaCy/blob/master/spacy/about.py
 
 __title__ = 'quickumls'
-__version__ = '1.3.0r4'
+__version__ = '1.4.0r1'
 __author__ = 'Luca Soldaini'
 __email__ = 'luca@ir.cs.georgetown.edu'
 __license__ = 'MIT'
 __uri__ = "https://github.com/Georgetown-IR-Lab/QuickUMLS"
-__copyright__ = '2014-2019, Georgetown University Information Retrieval Lab'
+__copyright__ = '2014-2020, Georgetown University Information Retrieval Lab'

@@ -102,13 +102,13 @@ def extract_from_mrconso(
     print(status)
 
 
-def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir):
+def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend):
     # Create destination directories for the two databases
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
 
     ss_db = SimstringDBWriter(simstring_dir)
-    cuisty_db = CuiSemTypesDB(cuisty_dir)
+    cuisty_db = CuiSemTypesDB(cuisty_dir, database_backend=database_backend)
 
     simstring_terms = set()
 
@@ -152,6 +152,10 @@ def parse_args():
     ap.add_argument(
         '-U', '--normalize-unicode', action='store_true',
         help='Normalize unicode strings to their closest ASCII representation'
+    )
+    ap.add_argument(
+        '-d', '--database-backend', choices=('leveldb', 'unqlite'), default='leveldb',
+        help='KV database to use to store CUIs and semantic types'
     )
     ap.add_argument(
         '-E', '--language', default='ENG', choices=LANGUAGES,
@@ -209,6 +213,10 @@ def main():
     with open(flag_fp, 'w') as f:
         f.write(opts.language)
 
+    flag_fp = os.path.join(opts.destination_path, 'database_backend.flag')
+    with open(flag_fp, 'w') as f:
+        f.write(opts.database_backend)
+
     mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
     mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.RRF')
 
@@ -217,7 +225,8 @@ def main():
     simstring_dir = os.path.join(opts.destination_path, 'umls-simstring.db')
     cuisty_dir = os.path.join(opts.destination_path, 'cui-semtypes.db')
 
-    parse_and_encode_ngrams(mrconso_iterator, simstring_dir, cuisty_dir)
+    parse_and_encode_ngrams(mrconso_iterator, simstring_dir, cuisty_dir,
+                            database_backend=opts.database_backend)
 
 
 if __name__ == '__main__':
