@@ -244,8 +244,8 @@ class CuiSemTypesDB(object):
             self.cui_db_put = self.cui_db.Put
             self.cui_db_get = self.cui_db.Get
             self.semtypes_db = leveldb.LevelDB(os.path.join(path, 'semtypes.leveldb'))
-            self.semtypes_db_put = self.semtypes.Put
-            self.semtypes_db_get = self.semtypes.Get
+            self.semtypes_db_put = self.semtypes_db.Put
+            self.semtypes_db_get = self.semtypes_db.Get
         else:
             raise ValueError(f'database_backend {database_backend} not recognized')
 
