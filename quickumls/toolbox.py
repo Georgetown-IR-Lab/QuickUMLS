@@ -3,6 +3,7 @@ from __future__ import unicode_literals, division, print_function
 # build-in modules
 import re
 import os
+from functools import wraps
 import six
 import unicodedata
 from string import punctuation
@@ -12,6 +13,11 @@ from six.moves import xrange
 # installed modules
 import numpy
 import leveldb
+try:
+    import unqlite
+    UNQLITE_AVAILABLE = True
+except ImportError:
+    UNQLITE_AVAILABLE = False
 
 # project imports
 from quickumls_simstring import simstring
@@ -216,21 +222,37 @@ class Intervals(object):
 
 
 class CuiSemTypesDB(object):
-    def __init__(self, path):
+    def __init__(self, path, database_backend='leveldb'):
         if not (os.path.exists(path) or os.path.isdir(path)):
             err_msg = (
                 '"{}" is not a valid directory').format(path)
             raise IOError(err_msg)
 
-        self.cui_db = leveldb.LevelDB(
-            os.path.join(path, 'cui.leveldb'))
-        self.semtypes_db = leveldb.LevelDB(
-            os.path.join(path, 'semtypes.leveldb'))
+        if database_backend == 'unqlite':
+            assert UNQLITE_AVAILABLE, (
+                'You selected unqlite as database backend, but it is not '
+                'installed. Please install it via `pip install unqlite`'
+            )
+            self.cui_db = unqlite.UnQLite(os.path.join(path, 'cui.unqlite'))
+            self.cui_db_put = self.cui_db.store
+            self.cui_db_get = self.cui_db.fetch
+            self.semtypes_db = unqlite.UnQLite(os.path.join(path, 'semtypes.unqlite'))
+            self.semtypes_db_put = self.semtypes_db.store
+            self.semtypes_db_get = self.semtypes_db.fetch
+        elif database_backend == 'leveldb':
+            self.cui_db = leveldb.LevelDB(os.path.join(path, 'cui.leveldb'))
+            self.cui_db_put = self.cui_db.Put
+            self.cui_db_get = self.cui_db.Get
+            self.semtypes_db = leveldb.LevelDB(os.path.join(path, 'semtypes.leveldb'))
+            self.semtypes_db_put = self.semtypes_db.Put
+            self.semtypes_db_get = self.semtypes_db.Get
+        else:
+            raise ValueError(f'database_backend {database_backend} not recognized')
 
     def has_term(self, term):
         term = prepare_string_for_db_input(safe_unicode(term))
         try:
-            self.cui_db.Get(db_key_encode(term))
+            self.cui_db_get(db_key_encode(term))
             return True
         except KeyError:
             return
@@ -242,28 +264,31 @@ class CuiSemTypesDB(object):
         # some terms have multiple cuis associated with them,
         # so we store them all
         try:
-            cuis = pickle.loads(self.cui_db.Get(db_key_encode(term)))
+            cuis = pickle.loads(self.cui_db_get(db_key_encode(term)))
         except KeyError:
             cuis = set()
 
         cuis.add((cui, is_preferred))
-        self.cui_db.Put(db_key_encode(term), pickle.dumps(cuis))
+        self.cui_db_put(db_key_encode(term), pickle.dumps(cuis))
 
         try:
-            self.semtypes_db.Get(db_key_encode(cui))
+            self.semtypes_db_get(db_key_encode(cui))
         except KeyError:
-            self.semtypes_db.Put(
+            self.semtypes_db_put(
                 db_key_encode(cui), pickle.dumps(set(semtypes))
             )
 
     def get(self, term):
         term = prepare_string_for_db_input(safe_unicode(term))
+        try:
+            cuis = pickle.loads(self.cui_db_get(db_key_encode(term)))
+        except KeyError:
+            cuis = set()
 
-        cuis = pickle.loads(self.cui_db.Get(db_key_encode(term)))
         matches = (
             (
                 cui,
-                pickle.loads(self.semtypes_db.Get(db_key_encode(cui))),
+                pickle.loads(self.semtypes_db_get(db_key_encode(cui))),
                 is_preferred
             )
             for cui, is_preferred in cuis

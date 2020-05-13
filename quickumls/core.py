@@ -126,6 +126,19 @@ class QuickUMLS(object):
             )
             spacy_lang = constants.SPACY_LANGUAGE_MAP[self.language_flag]
 
+        database_backend_fp = os.path.join(quickumls_fp, 'database_backend.flag')
+        if os.path.exists(database_backend_fp):
+            with open(database_backend_fp) as f:
+                self._database_backend = f.read().strip()
+        else:
+            print('[WARNING] This installation was created with QuickUMLS v.1.3 or earlier, '
+                  'which does not support multiple database backends. For now, I\'ll '
+                  'assume that leveldb was used as default, implicit assumption will '
+                  'change in future versions of QuickUMLS. More info here: '
+                  'https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4',
+                  file=sys.stderr)
+            self._database_backend = 'leveldb'
+
         # domain specific stopwords
         self._stopwords = self._stopwords.union(constants.DOMAIN_SPECIFIC_STOPWORDS)
 
@@ -149,7 +162,9 @@ class QuickUMLS(object):
         self.ss_db = toolbox.SimstringDBReader(
             simstring_fp, similarity_name, threshold
         )
-        self.cuisem_db = toolbox.CuiSemTypesDB(cuisem_fp)
+        self.cuisem_db = toolbox.CuiSemTypesDB(
+            cuisem_fp, database_backend=self._database_backend
+        )
 
     def get_info(self):
         """Computes a summary of the matcher options.
