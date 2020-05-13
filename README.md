@@ -1,4 +1,4 @@
-[**NEW: v.1.4 supports multi- thread and process reads!**](https://giphy.com/embed/BlVnrxJgTGsUw) I've finally added support for [unqlite](https://github.com/coleifer/unqlite-python) as an alternative to leveldb for storage of CUIs and Semantic Types (see [here](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4) for more details). Other than better multi- processing and threading support, unqlite should have better support for unicode.
+[**NEW: v.1.4 supports starting multiple QuickUMLS matchers concurrently!**](https://giphy.com/embed/BlVnrxJgTGsUw) I've finally added support for [unqlite](https://github.com/coleifer/unqlite-python) as an alternative to leveldb for storage of CUIs and Semantic Types (see [here](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4) for more details). unqlite-backed QuickUMLS installation support multiple matchers running at the same time. Other than better multi-processing support, unqlite should have better support for unicode.
 
 # QuickUMLS
 
