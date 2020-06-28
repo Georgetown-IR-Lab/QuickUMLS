@@ -322,15 +322,17 @@ class QuickUMLS(object):
             for match in ngram_cands:
                 cuisem_match = sorted(self.cuisem_db.get(match))
 
-                for cui, semtypes, preferred in cuisem_match:
-                    match_similarity = toolbox.get_similarity(
-                        x=ngram_normalized,
-                        y=match,
-                        n=self.ngram_length,
-                        similarity_name=self.similarity_name
-                    )
-                    if match_similarity == 0:
+                match_similarity = toolbox.get_similarity(
+                    x=ngram_normalized,
+                    y=match,
+                    n=self.ngram_length,
+                    similarity_name=self.similarity_name
+                )
+
+                if match_similarity == 0:
                         continue
+
+                for cui, semtypes, preferred in cuisem_match:
 
                     if not self._is_ok_semtype(semtypes):
                         continue
