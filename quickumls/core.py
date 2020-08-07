@@ -26,7 +26,8 @@ class QuickUMLS(object):
             overlapping_criteria='score', threshold=0.7, window=5,
             similarity_name='jaccard', min_match_length=3,
             accepted_semtypes=constants.ACCEPTED_SEMTYPES,
-            verbose=False, keep_uppercase=False):
+            verbose=False, keep_uppercase=False,
+            spacy_component = False):
         """Instantiate QuickUMLS object
 
             This is the main interface through which text can be processed.
@@ -146,18 +147,23 @@ class QuickUMLS(object):
 
         self.accepted_semtypes = accepted_semtypes
 
-        try:
-            self.nlp = spacy.load(spacy_lang)
-        except OSError:
-            msg = (
-                'Model for language "{}" is not downloaded. Please '
-                'run "python -m spacy download {}" before launching '
-                'QuickUMLS'
-            ).format(
-                self.language_flag,
-                constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
-            )
-            raise OSError(msg)
+        # if this is not being executed as as spacy component, then it must be standalone
+        if spacy_component:
+            # In this case, the pipeline is external to this current class
+            self.nlp = None
+        else:
+            try:
+                self.nlp = spacy.load(spacy_lang)
+            except OSError:
+                msg = (
+                    'Model for language "{}" is not downloaded. Please '
+                    'run "python -m spacy download {}" before launching '
+                    'QuickUMLS'
+                ).format(
+                    self.language_flag,
+                    constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
+                )
+                raise OSError(msg)
 
         self.ss_db = toolbox.SimstringDBReader(
             simstring_fp, similarity_name, threshold
