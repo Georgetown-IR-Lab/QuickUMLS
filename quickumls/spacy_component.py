@@ -8,65 +8,42 @@ from . import constants
 class SpacyQuickUMLS(object):
     name = 'QuickUMLS matcher'
     
-    def __init__(self, nlp, quickumls_path, 
-        # these are all params that were from match() in quickumls but since we want to construct this
-        # and then make its behavior consistent as a component, we'll set them here:
-        best_match = True, ignore_syntax = False, verbose = False,
-        # these below are the same as in quickumls.py (so let's pass them through as our wrapper)
-        overlapping_criteria='score', threshold=0.7, window=5,
-        similarity_name='jaccard', min_match_length=3,
-        accepted_semtypes=constants.ACCEPTED_SEMTYPES):
+    def __init__(self, nlp, quickumls_fp, best_match=True, ignore_syntax=False, **kwargs):
+        """Instantiate SpacyQuickUMLS object
+
+            This creates a QuickUMLS spaCy component which can be used in modular pipelines.  
+            This module adds entity Spans to the document where the entity label is the UMLS CUI and the Span's "underscore" object is extended to contains "similarity" and "semtypes" for matched concepts.
+
+        Args:
+            nlp: Existing spaCy pipeline.  This is needed to update the vocabulary with UMLS CUI values
+            quickumls_fp (str): Path to QuickUMLS data
+            best_match (bool, optional): Whether to return only the top match or all overlapping candidates. Defaults to True.
+            ignore_syntax (bool, optional): Wether to use the heuristcs introduced in the paper (Soldaini and Goharian, 2016). TODO: clarify,. Defaults to False
+            **kwargs: QuickUMLS keyword arguments (see QuickUMLS in core.py)
+        """
         
-        self.quickumls = QuickUMLS(quickumls_path, 
-            overlapping_criteria=overlapping_criteria, threshold=threshold, window=window,
-            similarity_name=similarity_name, min_match_length=min_match_length,
-            accepted_semtypes=accepted_semtypes,
-            # By default, the QuickUMLS objects creates its own internal spacy pipeline but we do not need that in this case
+        self.quickumls = QuickUMLS(quickumls_fp, 
+            # By default, the QuickUMLS objects creates its own internal spacy pipeline but this is not needed
+            # when we're using it as a component in a pipeline
             spacy_component = True,
-            verbose = verbose)
+            **kwargs)
         
         # save this off so that we can get vocab values of labels later
         self.nlp = nlp
         
+        # keep these for matching
         self.best_match = best_match
         self.ignore_syntax = ignore_syntax
-        self.verbose = verbose
 
         # let's extend this with some proprties that we want
         Span.set_extension('similarity', default = -1.0)
         Span.set_extension('semtypes', default = -1.0)
         
-        if self.verbose:
-            print('Accepted semtypes : [{0}]'.format(accepted_semtypes))
-        
     def __call__(self, doc):
-        # much of this is a re-write of match() in quickumls.py
-        # however, the changes include:
-        # receiving an incoming doc (rather than parsing at calling time)
-        # transforming matches into Spans as per spaCy custom Entity code example
+        # pass in the document which has been parsed to this point in the pipeline for ngrams and matches
+        matches = self.quickumls._match(doc, best_match=self.best_match, ignore_syntax=self.ignore_syntax)
         
-        ngrams = None
-        # pass in the incoming doc which has already been tokenized (ready for ngrams)
-        if self.ignore_syntax:
-            ngrams = self.quickumls._make_token_sequences(doc)
-        else:
-            ngrams = self.quickumls._make_ngrams(doc)
-            
-        # perform the matching
-        matches = self.quickumls._get_all_matches(ngrams)
-        
-        if self.verbose:
-            print('Total matches before best match: [{0}]'.format(len(matches)))
-        
-        if self.best_match:
-            matches = self.quickumls._select_terms(matches)
-            
-            if self.verbose:
-                print('Total matches after best match: [{0}]'.format(len(matches)))
-            
-        self.quickumls._print_verbose_status(doc, matches)
-        
-        # Here's another change: convert match objects into Spans
+        # Convert QuickUMLS match objects into Spans
         for match in matches:
             # each match may match multiple ngrams
             for ngram_match_dict in match:
@@ -74,15 +51,15 @@ class SpacyQuickUMLS(object):
                 end_char_idx = int(ngram_match_dict['end'])
                 
                 cui = ngram_match_dict['cui']
-                # add the string
+                # add the string to the spacy vocab
                 self.nlp.vocab.strings.add(cui)
                 # pull out the value
                 cui_label_value = self.nlp.vocab.strings[cui]
                 
-                # char_span() created a Span from the character indices
+                # char_span() creates a Span from these character indices
                 # UMLS CUI should work well as the label here
                 span = doc.char_span(start_char_idx, end_char_idx, label = cui_label_value)
-                # add some custom metadata
+                # add some custom metadata to the spans
                 span._.similarity = ngram_match_dict['similarity']
                 span._.semtypes = ngram_match_dict['semtypes']
                 doc.ents = list(doc.ents) + [span]
