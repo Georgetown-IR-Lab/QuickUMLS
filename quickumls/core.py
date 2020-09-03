@@ -26,7 +26,8 @@ class QuickUMLS(object):
             overlapping_criteria='score', threshold=0.7, window=5,
             similarity_name='jaccard', min_match_length=3,
             accepted_semtypes=constants.ACCEPTED_SEMTYPES,
-            verbose=False, keep_uppercase=False):
+            verbose=False, keep_uppercase=False,
+            spacy_component = False):
         """Instantiate QuickUMLS object
 
             This is the main interface through which text can be processed.
@@ -146,18 +147,23 @@ class QuickUMLS(object):
 
         self.accepted_semtypes = accepted_semtypes
 
-        try:
-            self.nlp = spacy.load(spacy_lang)
-        except OSError:
-            msg = (
-                'Model for language "{}" is not downloaded. Please '
-                'run "python -m spacy download {}" before launching '
-                'QuickUMLS'
-            ).format(
-                self.language_flag,
-                constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
-            )
-            raise OSError(msg)
+        # if this is not being executed as as spacy component, then it must be standalone
+        if spacy_component:
+            # In this case, the pipeline is external to this current class
+            self.nlp = None
+        else:
+            try:
+                self.nlp = spacy.load(spacy_lang)
+            except OSError:
+                msg = (
+                    'Model for language "{}" is not downloaded. Please '
+                    'run "python -m spacy download {}" before launching '
+                    'QuickUMLS'
+                ).format(
+                    self.language_flag,
+                    constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
+                )
+                raise OSError(msg)
 
         self.ss_db = toolbox.SimstringDBReader(
             simstring_fp, similarity_name, threshold
@@ -437,17 +443,39 @@ class QuickUMLS(object):
         """
 
         parsed = self.nlp(u'{}'.format(text))
+        
+        # pass in parsed spacy doc to get concept matches
+        matches = self._match(parsed)
 
+        return matches
+        
+    def _match(self, doc, best_match=True, ignore_syntax=False):
+        """Gathers ngram matches given a spaCy document object.
+
+        [extended_summary]
+
+        Args:
+            text (Document): spaCy Document object to be used for extracting ngrams
+
+            best_match (bool, optional): Whether to return only the top match or all overlapping candidates. Defaults to True.
+            ignore_syntax (bool, optional): Wether to use the heuristcs introduced in the paper (Soldaini and Goharian, 2016). TODO: clarify,. Defaults to False
+
+        Returns:
+            List: List of all matches in the text
+            TODO: Describe format
+        """
+        
+        ngrams = None
         if ignore_syntax:
-            ngrams = self._make_token_sequences(parsed)
+            ngrams = self._make_token_sequences(doc)
         else:
-            ngrams = self._make_ngrams(parsed)
+            ngrams = self._make_ngrams(doc)
 
         matches = self._get_all_matches(ngrams)
 
         if best_match:
             matches = self._select_terms(matches)
 
-        self._print_verbose_status(parsed, matches)
-
+        self._print_verbose_status(doc, matches)
+        
         return matches

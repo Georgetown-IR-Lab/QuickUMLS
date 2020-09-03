@@ -52,6 +52,29 @@ Set `best_match` to `False` if you want to return overlapping candidates, `ignor
 
 If the matcher throws a warning during initialization, read [this page](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4) to learn why and how to stop it from doing so.
 
+## spaCy pipeline component
+
+QuickUMLS can be used for standalone processing but it can also be use as a component in a modular spaCy pipeline.  This follows traditional spaCy handling of concepts to be entity objects added to the Document object.  These entity objects contain the CUI, similarity score and Semantic Types in the spacy "underscore" object.
+
+Adding QuickUMLS as a component in a pipeline can be done as follows:
+
+```python
+from quickumls.spacy_component import SpacyQuickUMLS
+
+# common English pipeline
+nlp = spacy.load('en_core_web_sm')
+
+quickumls_component = SpacyQuickUMLS(nlp, 'PATH_TO_QUICKUMLS_DATA')
+nlp.add_pipe(quickumls_component)
+
+doc = nlp('Pt c/o shortness of breath, chest pain, nausea, vomiting, diarrrhea')
+
+for ent in doc.ents:
+    print('Entity text : {}'.format(ent.text))
+    print('Label (UMLS CUI) : {}'.format(ent.label_))
+    print('Similarity : {}'.format(ent._.similarity))
+    print('Semtypes : {}'.format(ent._.semtypes))
+```
 
 ## Server / Client Support
 
