@@ -1,18 +1,18 @@
-from __future__ import unicode_literals, division, print_function
+from __future__ import division, print_function, unicode_literals
 
+import os
 # build-in modules
 import re
-import os
-from functools import wraps
-import six
 import unicodedata
+from functools import wraps
+from itertools import repeat, takewhile
 from string import punctuation
-from itertools import takewhile, repeat
-from six.moves import xrange
 
+import leveldb
 # installed modules
 import numpy
-import leveldb
+import six
+from six.moves import xrange
 
 try:
     import unqlite
@@ -23,7 +23,6 @@ except ImportError:
 
 # project imports
 from quickumls_simstring import simstring
-
 
 # Python version specific imports
 if six.PY2:

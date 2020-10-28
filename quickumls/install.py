@@ -18,10 +18,11 @@ except ImportError:
 import spacy
 import tqdm
 
-from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
-
+from .constants import (HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES,
+                        SPACY_LANGUAGE_MAP)
 # project modules
-from .toolbox import CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines, mkdir
+from .toolbox import (CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines,
+                      mkdir)
 
 
 def get_semantic_types(path, headers):

@@ -1,8 +1,9 @@
-from setuptools import setup, find_packages
-import os
-import io
-import sys
 import contextlib
+import io
+import os
+import sys
+
+from setuptools import find_packages, setup
 
 PACKAGES = find_packages()
 

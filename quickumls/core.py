@@ -1,20 +1,20 @@
 # future statements for Python 2 compatibility
-from __future__ import unicode_literals, division, print_function, absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
+import datetime
 # built in modules
 import os
 import sys
-import datetime
-from six.moves import xrange
 
+import nltk
 # installed modules
 import spacy
-import nltk
+from six.moves import xrange
 from unidecode import unidecode
 
 # project modules
-from . import toolbox
-from . import constants
+from . import constants, toolbox
 
 
 class QuickUMLS(object):

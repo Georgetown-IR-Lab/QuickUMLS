@@ -1,9 +1,9 @@
 import spacy
-from spacy.tokens import Span
 from spacy.strings import StringStore
+from spacy.tokens import Span
 
-from .core import QuickUMLS
 from . import constants
+from .core import QuickUMLS
 
 
 class SpacyQuickUMLS(object):

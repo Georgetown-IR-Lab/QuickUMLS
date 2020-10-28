@@ -1,5 +1,5 @@
-from .network import MinimalClient
 from .core import QuickUMLS
+from .network import MinimalClient
 
 
 def get_quickumls_client(host="localhost", port=4645):

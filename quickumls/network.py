@@ -1,21 +1,22 @@
 """Minimal client server through sockets
 https://github.com/lucasoldaini/MinimalServer"""
 
-import six
-import sys
-import time
+import datetime
+import inspect
 import math
 import socket
-import inspect
-import datetime
+import sys
 import threading
+import time
+
+import six
 
 try:
-    import SocketServer as socketserver
     import cPickle as pickle
+    import SocketServer as socketserver
 except ImportError:
-    import socketserver
     import pickle
+    import socketserver
 
 
 def pad_message(message, blocklength):
