@@ -171,6 +171,9 @@ class QuickUMLS(object):
         self.cuisem_db = toolbox.CuiSemTypesDB(
             cuisem_fp, database_backend=self._database_backend
         )
+        self.cuipref_db = toolbox.CuiPrefDB(
+            cuisem_fp, database_backend=self._database_backend
+        )
 
     def get_info(self):
         """Computes a summary of the matcher options.
@@ -336,7 +339,7 @@ class QuickUMLS(object):
                 )
 
                 if match_similarity == 0:
-                        continue
+                    continue
 
                 for cui, semtypes, preferred in cuisem_match:
 
@@ -350,6 +353,7 @@ class QuickUMLS(object):
                             continue
 
                     prev_cui = cui
+                    preferred_term = self.cuipref_db.get(cui)
 
                     ngram_matches.append(
                         {
@@ -360,7 +364,8 @@ class QuickUMLS(object):
                             'cui': cui,
                             'similarity': match_similarity,
                             'semtypes': semtypes,
-                            'preferred': preferred
+                            'preferred': preferred,
+                            'preferred term': preferred_term
                         }
                     )
 

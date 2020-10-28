@@ -294,3 +294,51 @@ class CuiSemTypesDB(object):
             for cui, is_preferred in cuis
         )
         return matches
+
+
+class CuiPrefDB(object):
+    def __init__(self, path, database_backend='leveldb'):
+        if not (os.path.exists(path) or os.path.isdir(path)):
+            err_msg = (
+                '"{}" is not a valid directory').format(path)
+            raise IOError(err_msg)
+
+        if database_backend == 'unqlite':
+            assert UNQLITE_AVAILABLE, (
+                'You selected unqlite as database backend, but it is not '
+                'installed. Please install it via `pip install unqlite`'
+            )
+            self.cui_db = unqlite.UnQLite(os.path.join(path, 'cui_pref.unqlite'))
+            self.cui_db_put = self.cui_db.store
+            self.cui_db_get = self.cui_db.fetch
+        elif database_backend == 'leveldb':
+            self.cui_db = leveldb.LevelDB(os.path.join(path, 'cui_pref.leveldb'))
+            self.cui_db_put = self.cui_db.Put
+            self.cui_db_get = self.cui_db.Get
+        else:
+            raise ValueError(f'database_backend {database_backend} not recognized')
+
+    def has_cui(self, cui):
+        cui = prepare_string_for_db_input(safe_unicode(cui))
+        try:
+            self.cui_db_get(db_key_encode(cui))
+            return True
+        except KeyError:
+            return False
+
+    def insert(self, term, cui):
+        term = prepare_string_for_db_input(safe_unicode(term))
+        cui = prepare_string_for_db_input(safe_unicode(cui))
+
+        if self.has_cui(cui):
+            db_term = pickle.loads(self.cui_db_get(db_key_encode(cui)))
+            raise RuntimeError(f"DB shouldn't contain preferred term for CUI twice: {cui}, {term}, {db_term}")
+
+        self.cui_db_put(db_key_encode(cui), pickle.dumps(term))
+
+    def get(self, cui):
+        cui = prepare_string_for_db_input(safe_unicode(cui))
+        try:
+            return pickle.loads(self.cui_db_get(db_key_encode(cui)))
+        except KeyError:
+            return

@@ -3,7 +3,7 @@ HEADERS_MRCONSO = [
     'scui', 'sdui', 'sab', 'tty', 'code', 'str', 'srl', 'suppress', 'cvf'
 ]
 HEADERS_MRSTY = [
-    'cui', 'sty', 'hier' 'desc', 'sid', 'num'
+    'cui', 'sty', 'hier', 'desc', 'sid', 'num'
 ]
 
 NEGATIONS = {'none', 'non', 'neither', 'nor', 'no', 'not'}

@@ -1,26 +1,27 @@
-from __future__ import unicode_literals, division, print_function
+from __future__ import division, print_function, unicode_literals
 
 # built in modules
 import argparse
 import codecs
 import os
-from six.moves import input
 import shutil
 import sys
 import time
+
+from six.moves import input
+
 try:
     from unidecode import unidecode
 except ImportError:
     pass
-
-
 # third party-dependencies
 import spacy
+import tqdm
 
+from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
 
 # project modules
-from .toolbox import countlines, CuiSemTypesDB, SimstringDBWriter, mkdir
-from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
+from .toolbox import CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines, mkdir
 
 
 def get_semantic_types(path, headers):
@@ -36,7 +37,7 @@ def get_semantic_types(path, headers):
 
 def get_mrconso_iterator(path, headers, lang='ENG'):
     with codecs.open(path, encoding='utf-8') as f:
-        for i, ln in enumerate(f):
+        for ln in f:
             content = dict(zip(headers, ln.strip().split('|')))
 
             if content['lat'] != lang:
@@ -63,23 +64,12 @@ def extract_from_mrconso(
 
     total = countlines(mrconso_path)
 
-    processed = set()
-    i = 0
-
-    for content in mrconso_iterator:
-        i += 1
-
-        if i % 100000 == 0:
-            delta = time.time() - start
-            status = (
-                '{:,} in {:.2f} s ({:.2%}, {:.1e} s / term)'
-                ''.format(i, delta, i / total, delta / i if i > 0 else 0)
-            )
-            print(status)
-
-        concept_text = content['str'].strip()
-        cui = content['cui']
-        preferred = 1 if content['ispref'] == 'Y' else 0
+    for content in tqdm.tqdm(mrconso_iterator, total=total):
+        concept_text = content["str"].strip()
+        cui = content["cui"]
+        preferred = 1 if content["ispref"] == "Y" else 0
+        preferred_term = 1 if content["ts"] == "P" else 0
+        preferred_string = 1 if content["stt"] == "PF" else 0
 
         if opts.lowercase:
             concept_text = concept_text.lower()
@@ -87,19 +77,14 @@ def extract_from_mrconso(
         if opts.normalize_unicode:
             concept_text = unidecode(concept_text)
 
-        if (cui, concept_text) in processed:
-            continue
-        else:
-            processed.add((cui, concept_text))
-
-        yield (concept_text, cui, sem_types[cui], preferred)
-
-    delta = time.time() - start
-    status = (
-        '\nCOMPLETED: {:,} in {:.2f} s ({:.1e} s / term)'
-        ''.format(i, delta, i / total, delta / i if i > 0 else 0)
+        yield (
+            concept_text,
+            cui,
+            sem_types[cui],
+            preferred,
+            preferred_term,
+            preferred_string,
     )
-    print(status)
 
 
 def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend):
@@ -109,15 +94,29 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
 
     ss_db = SimstringDBWriter(simstring_dir)
     cuisty_db = CuiSemTypesDB(cuisty_dir, database_backend=database_backend)
+    cuipref_db = CuiPrefDB(cuisty_dir, database_backend=database_backend)
 
     simstring_terms = set()
 
-    for i, (term, cui, stys, preferred) in enumerate(extracted_it, start=1):
+    prev_cui = None
+    pref_term = False
+    for term, cui, stys, preferred, preferred_term, preferred_string in extracted_it:
+        if cui != prev_cui:
+            if prev_cui is not None:
+                if not pref_term:
+                    raise RuntimeError(
+                        f"did not find preferred term for cui {prev_cui}"
+                    )
+            prev_cui = cui
+            pref_term = False
         if term not in simstring_terms:
             ss_db.insert(term)
             simstring_terms.add(term)
 
         cuisty_db.insert(term, cui, stys, preferred)
+        if preferred_term and preferred and preferred_string:
+            cuipref_db.insert(term, cui)
+            pref_term = True
 
 
 def install_spacy(lang):
