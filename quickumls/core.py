@@ -450,7 +450,7 @@ class QuickUMLS(object):
         parsed = self.nlp(u'{}'.format(text))
         
         # pass in parsed spacy doc to get concept matches
-        matches = self._match(parsed)
+        matches = self._match(parsed, best_match, ignore_syntax)
 
         return matches
         
