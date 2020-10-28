@@ -26,41 +26,43 @@ from .toolbox import CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines, mk
 
 def get_semantic_types(path, headers):
     sem_types = {}
-    with codecs.open(path, encoding='utf-8') as f:
+    with codecs.open(path, encoding="utf-8") as f:
         for i, ln in enumerate(f):
-            content = dict(zip(headers, ln.strip().split('|')))
+            content = dict(zip(headers, ln.strip().split("|")))
 
-            sem_types.setdefault(content['cui'], []).append(content['sty'])
+            sem_types.setdefault(content["cui"], []).append(content["sty"])
 
     return sem_types
 
 
-def get_mrconso_iterator(path, headers, lang='ENG'):
-    with codecs.open(path, encoding='utf-8') as f:
+def get_mrconso_iterator(path, headers, lang="ENG"):
+    with codecs.open(path, encoding="utf-8") as f:
         for ln in f:
-            content = dict(zip(headers, ln.strip().split('|')))
+            content = dict(zip(headers, ln.strip().split("|")))
 
-            if content['lat'] != lang:
+            if content["lat"] != lang:
                 continue
 
             yield content
 
 
 def extract_from_mrconso(
-        mrconso_path, mrsty_path, opts,
-        mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
+    mrconso_path,
+    mrsty_path,
+    opts,
+    mrconso_header=HEADERS_MRCONSO,
+    mrsty_header=HEADERS_MRSTY,
+):
 
     start = time.time()
-    print('loading semantic types...', end=' ')
+    print("loading semantic types...", end=" ")
     sys.stdout.flush()
     sem_types = get_semantic_types(mrsty_path, mrsty_header)
-    print('done in {:.2f} s'.format(time.time() - start))
+    print("done in {:.2f} s".format(time.time() - start))
 
     start = time.time()
 
-    mrconso_iterator = get_mrconso_iterator(
-        mrconso_path, mrconso_header, opts.language
-    )
+    mrconso_iterator = get_mrconso_iterator(mrconso_path, mrconso_header, opts.language)
 
     total = countlines(mrconso_path)
 
@@ -84,7 +86,7 @@ def extract_from_mrconso(
             preferred,
             preferred_term,
             preferred_string,
-    )
+        )
 
 
 def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend):
@@ -127,38 +129,50 @@ def install_spacy(lang):
     if lang in SPACY_LANGUAGE_MAP:
         try:
             spacy.load(SPACY_LANGUAGE_MAP[lang])
-            print(f'SpaCy is installed and avaliable for {lang}!')
+            print(f"SpaCy is installed and avaliable for {lang}!")
         except OSError:
-            print(f'SpaCy is not available! Attempting to download and install...')
+            print(f"SpaCy is not available! Attempting to download and install...")
             spacy.cli.download(SPACY_LANGUAGE_MAP[lang])
 
 
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument(
-        'umls_installation_path',
-        help=('Location of UMLS installation files (`MRCONSO.RRF` and '
-              '`MRSTY.RRF` files)')
+        "umls_installation_path",
+        help=(
+            "Location of UMLS installation files (`MRCONSO.RRF` and "
+            "`MRSTY.RRF` files)"
+        ),
     )
     ap.add_argument(
-        'destination_path',
-        help='Location where the necessary QuickUMLS files are installed'
+        "destination_path",
+        help="Location where the necessary QuickUMLS files are installed",
     )
     ap.add_argument(
-        '-L', '--lowercase', action='store_true',
-        help='Consider only lowercase version of tokens'
+        "-L",
+        "--lowercase",
+        action="store_true",
+        help="Consider only lowercase version of tokens",
     )
     ap.add_argument(
-        '-U', '--normalize-unicode', action='store_true',
-        help='Normalize unicode strings to their closest ASCII representation'
+        "-U",
+        "--normalize-unicode",
+        action="store_true",
+        help="Normalize unicode strings to their closest ASCII representation",
     )
     ap.add_argument(
-        '-d', '--database-backend', choices=('leveldb', 'unqlite'), default='unqlite',
-        help='KV database to use to store CUIs and semantic types'
+        "-d",
+        "--database-backend",
+        choices=("leveldb", "unqlite"),
+        default="unqlite",
+        help="KV database to use to store CUIs and semantic types",
     )
     ap.add_argument(
-        '-E', '--language', default='ENG', choices=LANGUAGES,
-        help='Extract concepts of the specified language'
+        "-E",
+        "--language",
+        default="ENG",
+        choices=LANGUAGES,
+        help="Extract concepts of the specified language",
     )
     opts = ap.parse_args()
     return opts
@@ -170,63 +184,71 @@ def main():
     install_spacy(opts.language)
 
     if not os.path.exists(opts.destination_path):
-        msg = ('Directory "{}" does not exists; should I create it? [y/N] '
-               ''.format(opts.destination_path))
-        create = input(msg).lower().strip() == 'y'
+        msg = 'Directory "{}" does not exists; should I create it? [y/N] ' "".format(
+            opts.destination_path
+        )
+        create = input(msg).lower().strip() == "y"
 
         if create:
             os.makedirs(opts.destination_path)
         else:
-            print('Aborting.')
+            print("Aborting.")
             exit(1)
 
     if len(os.listdir(opts.destination_path)) > 0:
-        msg = ('Directory "{}" is not empty; should I empty it? [y/N] '
-               ''.format(opts.destination_path))
-        empty = input(msg).lower().strip() == 'y'
+        msg = 'Directory "{}" is not empty; should I empty it? [y/N] ' "".format(
+            opts.destination_path
+        )
+        empty = input(msg).lower().strip() == "y"
         if empty:
             shutil.rmtree(opts.destination_path)
             os.mkdir(opts.destination_path)
         else:
-            print('Aborting.')
+            print("Aborting.")
             exit(1)
 
     if opts.normalize_unicode:
         try:
             unidecode
         except NameError:
-            err = ('`unidecode` is needed for unicode normalization'
-                   'please install it via the `[sudo] pip install '
-                   'unidecode` command.')
+            err = (
+                "`unidecode` is needed for unicode normalization"
+                "please install it via the `[sudo] pip install "
+                "unidecode` command."
+            )
             print(err, file=sys.stderr)
             exit(1)
 
-        flag_fp = os.path.join(opts.destination_path, 'normalize-unicode.flag')
-        open(flag_fp, 'w').close()
+        flag_fp = os.path.join(opts.destination_path, "normalize-unicode.flag")
+        open(flag_fp, "w").close()
 
     if opts.lowercase:
-        flag_fp = os.path.join(opts.destination_path, 'lowercase.flag')
-        open(flag_fp, 'w').close()
+        flag_fp = os.path.join(opts.destination_path, "lowercase.flag")
+        open(flag_fp, "w").close()
 
-    flag_fp = os.path.join(opts.destination_path, 'language.flag')
-    with open(flag_fp, 'w') as f:
+    flag_fp = os.path.join(opts.destination_path, "language.flag")
+    with open(flag_fp, "w") as f:
         f.write(opts.language)
 
-    flag_fp = os.path.join(opts.destination_path, 'database_backend.flag')
-    with open(flag_fp, 'w') as f:
+    flag_fp = os.path.join(opts.destination_path, "database_backend.flag")
+    with open(flag_fp, "w") as f:
         f.write(opts.database_backend)
 
-    mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
-    mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.RRF')
+    mrconso_path = os.path.join(opts.umls_installation_path, "MRCONSO.RRF")
+    mrsty_path = os.path.join(opts.umls_installation_path, "MRSTY.RRF")
 
     mrconso_iterator = extract_from_mrconso(mrconso_path, mrsty_path, opts)
 
-    simstring_dir = os.path.join(opts.destination_path, 'umls-simstring.db')
-    cuisty_dir = os.path.join(opts.destination_path, 'cui-semtypes.db')
+    simstring_dir = os.path.join(opts.destination_path, "umls-simstring.db")
+    cuisty_dir = os.path.join(opts.destination_path, "cui-semtypes.db")
 
-    parse_and_encode_ngrams(mrconso_iterator, simstring_dir, cuisty_dir,
-                            database_backend=opts.database_backend)
+    parse_and_encode_ngrams(
+        mrconso_iterator,
+        simstring_dir,
+        cuisty_dir,
+        database_backend=opts.database_backend,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
