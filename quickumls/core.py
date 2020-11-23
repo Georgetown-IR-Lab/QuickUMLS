@@ -326,6 +326,9 @@ class QuickUMLS(object):
                     ).strip(),
                 )
 
+    def get_preferred_term(self, cui):
+        return self.cuipref_db.get(cui)
+
     def _get_all_matches(self, ngrams):
         matches = []
         for start, end, ngram in ngrams:
