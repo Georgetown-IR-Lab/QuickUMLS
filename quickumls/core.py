@@ -353,7 +353,7 @@ class QuickUMLS(object):
                 ngram_normalized = ngram_normalized.lower()
 
             prev_cui = None
-            ngram_cands = list(self.ss_db.get(ngram_normalized))
+            ngram_cands = list(set(self.ss_db.get(ngram_normalized)))
 
             ngram_matches = []
 

@@ -8,7 +8,9 @@ import shutil
 import sys
 import time
 
+import tqdm
 from six.moves import input
+import mmap
 
 try:
     from unidecode import unidecode
@@ -18,19 +20,23 @@ except ImportError:
 import spacy
 import tqdm
 
-from .constants import (HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES,
-                        SPACY_LANGUAGE_MAP)
+from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
+
 # project modules
-from .toolbox import (CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines,
-                      mkdir)
+from .toolbox import (
+    CuiPrefDB,
+    CuiSemTypesDB,
+    SimstringDBWriter,
+    countlines,
+    mkdir,
+)
 
 
 def get_semantic_types(path, headers):
     sem_types = {}
     with codecs.open(path, encoding="utf-8") as f:
-        for i, ln in enumerate(f):
-            content = dict(zip(headers, ln.strip().split("|")))
-
+        for line in tqdm.tqdm(f, total=countlines(path)):
+            content = dict(zip(headers, line.strip().split("|")))
             sem_types.setdefault(content["cui"], []).append(content["sty"])
 
     return sem_types
@@ -99,10 +105,10 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
     cuisty_db = CuiSemTypesDB(cuisty_dir, database_backend=database_backend)
     cuipref_db = CuiPrefDB(cuisty_dir, database_backend=database_backend)
 
-    simstring_terms = set()
-
     prev_cui = None
     pref_term = False
+    prev_term = None
+    cui_terms = set()
     for term, cui, stys, preferred, preferred_term, preferred_string in extracted_it:
         if cui != prev_cui:
             if prev_cui is not None:
@@ -112,9 +118,13 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
                     )
             prev_cui = cui
             pref_term = False
-        if term not in simstring_terms:
+            cui_terms = set()
+        else:
+            cui_terms.add(term)
+
+        if prev_term != term and term not in cui_terms:
             ss_db.insert(term)
-            simstring_terms.add(term)
+        prev_term = term
 
         cuisty_db.insert(term, cui, stys, preferred)
         if preferred_term and preferred and preferred_string:
