@@ -8,28 +8,17 @@ import shutil
 import sys
 import time
 
+import spacy
 import tqdm
 from six.moves import input
-import mmap
 
 try:
     from unidecode import unidecode
 except ImportError:
     pass
-# third party-dependencies
-import spacy
-import tqdm
 
 from .constants import HEADERS_MRCONSO, HEADERS_MRSTY, LANGUAGES, SPACY_LANGUAGE_MAP
-
-# project modules
-from .toolbox import (
-    CuiPrefDB,
-    CuiSemTypesDB,
-    SimstringDBWriter,
-    countlines,
-    mkdir,
-)
+from .toolbox import CuiPrefDB, CuiSemTypesDB, SimstringDBWriter, countlines, mkdir
 
 
 def get_semantic_types(path, headers):
@@ -119,12 +108,11 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
             prev_cui = cui
             pref_term = False
             cui_terms = set()
-        else:
-            cui_terms.add(term)
 
         if prev_term != term and term not in cui_terms:
             ss_db.insert(term)
         prev_term = term
+        cui_terms.add(term)
 
         cuisty_db.insert(term, cui, stys, preferred)
         if preferred_term and preferred and preferred_string:
