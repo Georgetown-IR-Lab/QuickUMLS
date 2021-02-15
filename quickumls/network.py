@@ -1,27 +1,27 @@
-'''Minimal client server through sockets
-https://github.com/lucasoldaini/MinimalServer'''
+"""Minimal client server through sockets
+https://github.com/lucasoldaini/MinimalServer"""
 
-import six
-import sys
-import time
+import datetime
+import inspect
 import math
 import socket
-import inspect
-import datetime
+import sys
 import threading
+import time
+
+import six
 
 try:
-    import SocketServer as socketserver
     import cPickle as pickle
+    import SocketServer as socketserver
 except ImportError:
-    import socketserver
     import pickle
+    import socketserver
 
 
 def pad_message(message, blocklength):
     """Pad a message so its length is a multiple of blocklength."""
-    message_padded_length = (
-        int(math.ceil(len(message) / blocklength)) * blocklength)
+    message_padded_length = int(math.ceil(len(message) / blocklength)) * blocklength
     padded_message = message.ljust(message_padded_length)
     return padded_message
 
@@ -36,7 +36,7 @@ def receive_data_in_chunks(sock, buffersize):
         chunk = sock.recv(buffersize)
         chunks.append(chunk)
 
-    data = b''.join(chunks).strip()
+    data = b"".join(chunks).strip()
     return data
 
 
@@ -46,7 +46,7 @@ def send_data_in_chunks(data, sock, buffersize):
 
     # We sent an empty chunk to signal that we're done
     # transmitting the message.
-    sock.send(b' ' * buffersize)
+    sock.send(b" " * buffersize)
 
 
 class MinimalServerHandler(socketserver.BaseRequestHandler):
@@ -66,19 +66,21 @@ class MinimalServerHandler(socketserver.BaseRequestHandler):
         # fails, pass the error as response (the client will raise
         # the expection)
         try:
-            response = getattr(
-                self.server.served_object, method_name)(*args, **kwargs)
+            response = getattr(self.server.served_object, method_name)(*args, **kwargs)
         except Exception as ex:
             response = ex
 
         # send the response to the client in chunks
         send_data_in_chunks(
             pickle.dumps(response, protocol=self.server.pickle_protocol),
-            self.request, self.server.buffersize)
+            self.request,
+            self.server.buffersize,
+        )
 
 
 class MinimalServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     """TCP Server"""
+
     served_object = None
     buffersize = 2048
     pickle_protocol = None
@@ -87,8 +89,14 @@ class MinimalServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 class MinimalClient(object):
     """Minimal client to provide communication with the server"""
 
-    def __init__(self, target_class, host='localhost', port=4444,
-                 buffersize=2048, pickle_protocol=None):
+    def __init__(
+        self,
+        target_class,
+        host="localhost",
+        port=4444,
+        buffersize=2048,
+        pickle_protocol=None,
+    ):
         """Initialize the client
         Args:
             target_class (object): the class to be served by the
@@ -118,8 +126,9 @@ class MinimalClient(object):
 
         # bind public methods on target_class here
         for method_name, method in inspect.getmembers(
-                target_class, predicate=predicate):
-            if method_name.startswith('_'):
+            target_class, predicate=predicate
+        ):
+            if method_name.startswith("_"):
                 continue
             setattr(self, method_name, self._func_req_wrapper(method_name))
 
@@ -131,8 +140,9 @@ class MinimalClient(object):
             """Send the request to the server"""
 
             # prepare the data
-            data = pickle.dumps((method_name, args, kwargs),
-                                protocol=self.pickle_protocol)
+            data = pickle.dumps(
+                (method_name, args, kwargs), protocol=self.pickle_protocol
+            )
 
             # open the socket
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -150,7 +160,7 @@ class MinimalClient(object):
                 data = pickle.loads(response)
             except EOFError:
                 # server sent an empty message"
-                msg = 'empty message received from the server.'
+                msg = "empty message received from the server."
                 raise RuntimeError(msg)
 
             # raises an exception if an exception was raised by the
@@ -164,8 +174,9 @@ class MinimalClient(object):
         return func_request
 
 
-def run_server(served_object, host='localhost',
-               port=4444, buffersize=2048, pickle_protocol=None):
+def run_server(
+    served_object, host="localhost", port=4444, buffersize=2048, pickle_protocol=None
+):
     """Runs the server
     Args:
         served_obkect (object): the object to be served by the
@@ -199,7 +210,7 @@ def run_server(served_object, host='localhost',
     server_thread.daemon = True
     server_thread.start()
     print(
-        '[{}] server running at {}:{} (press ^C to interrupt)'.format(
+        "[{}] server running at {}:{} (press ^C to interrupt)".format(
             datetime.datetime.now().isoformat(), host, port, server_thread.name
         )
     )
@@ -209,9 +220,7 @@ def run_server(served_object, host='localhost',
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print(
-            '\n[{}] server stopped'.format(datetime.datetime.now().isoformat())
-        )
+        print("\n[{}] server stopped".format(datetime.datetime.now().isoformat()))
 
     # Terminate the server
     server.shutdown()

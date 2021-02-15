@@ -1,8 +1,9 @@
-from setuptools import setup, find_packages
-import os
-import io
-import sys
 import contextlib
+import io
+import os
+import sys
+
+from setuptools import find_packages, setup
 
 PACKAGES = find_packages()
 
@@ -22,20 +23,19 @@ def chdir(new_dir):
 def setup_package():
     root = os.path.abspath(os.path.dirname(__file__))
 
-    with open('README.md') as reader:
+    with open("README.md") as reader:
         readme = reader.read()
 
-    with open('requirements.txt') as f:
+    with open("requirements.txt") as f:
         requirements = f.read().splitlines()
 
     dependency_links = []
     i = 0
     while i < len(requirements):
-        if requirements[i].startswith('https://'):
+        if requirements[i].startswith("https://"):
             dependency_links.append(requirements.pop(i))
         else:
             i += 1
-
 
     # From https://github.com/explosion/spaCy/blob/master/setup.py
     with chdir(root):
@@ -44,19 +44,19 @@ def setup_package():
             exec(f.read(), about)
 
     setup(
-        name=about['__title__'],
-        version=about['__version__'],
+        name=about["__title__"],
+        version=about["__version__"],
         description=(
-            'QuickUMLS is a tool for fast, unsupervised biomedical '
-            'concept extraction from medical text'
+            "QuickUMLS is a tool for fast, unsupervised biomedical "
+            "concept extraction from medical text"
         ),
         packages=PACKAGES,
         long_description=readme,
-        long_description_content_type='text/markdown',
-        author=about['__author__'],
-        author_email=about['__email__'],
-        url='https://github.com/Georgetown-IR-Lab/QuickUMLS',
-        license=about['__license__'],
+        long_description_content_type="text/markdown",
+        author=about["__author__"],
+        author_email=about["__email__"],
+        url="https://github.com/Georgetown-IR-Lab/QuickUMLS",
+        license=about["__license__"],
         install_requires=requirements,
         dependency_links=dependency_links,
         classifiers=[
@@ -67,8 +67,9 @@ def setup_package():
             "Development Status :: 5 - Production/Stable",
             "Topic :: Scientific/Engineering :: Artificial Intelligence",
             "Topic :: Scientific/Engineering :: Bio-Informatics",
-        ]
+        ],
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     setup_package()
