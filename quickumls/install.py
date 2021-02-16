@@ -68,6 +68,7 @@ def extract_from_mrconso(
         preferred = 1 if content["ispref"] == "Y" else 0
         preferred_term = 1 if content["ts"] == "P" else 0
         preferred_string = 1 if content["stt"] == "PF" else 0
+        source = content["sab"]
 
         if opts.lowercase:
             concept_text = concept_text.lower()
@@ -82,10 +83,13 @@ def extract_from_mrconso(
             preferred,
             preferred_term,
             preferred_string,
+            source,
         )
 
 
-def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend):
+def parse_and_encode_ngrams(
+    extracted_it, simstring_dir, cuisty_dir, database_backend, sources
+):
     # Create destination directories for the two databases
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
@@ -98,25 +102,45 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
     pref_term = False
     prev_term = None
     cui_terms = set()
-    for term, cui, stys, preferred, preferred_term, preferred_string in extracted_it:
+    ss_db_terms = []
+    cuisty_terms = []
+    pref_terms = []
+    cui_sources = set()
+    cuis = []
+    for data in extracted_it:
+        term, cui, stys, preferred, preferred_term, preferred_string, source = data
+        cuis.append(cui)
         if cui != prev_cui:
             if prev_cui is not None:
                 if not pref_term:
                     raise RuntimeError(
                         f"did not find preferred term for cui {prev_cui}"
                     )
+                if sources is None or cui_sources.intersection(sources):
+                    for term in ss_db_terms:
+                        ss_db.insert(term)
+                    for _data in cuisty_terms:
+                        cuisty_db.insert(*_data)
+                    for _data in pref_terms:
+                        cuipref_db.insert(*_data)
+
             prev_cui = cui
             pref_term = False
             cui_terms = set()
+            ss_db_terms = []
+            cuisty_terms = []
+            pref_terms = []
+            cui_sources = set()
 
         if prev_term != term and term not in cui_terms:
-            ss_db.insert(term)
+            ss_db_terms.append(term)
         prev_term = term
         cui_terms.add(term)
+        cui_sources.add(source)
 
-        cuisty_db.insert(term, cui, stys, preferred)
+        cuisty_terms.append((term, cui, stys, preferred))
         if preferred_term and preferred and preferred_string:
-            cuipref_db.insert(term, cui)
+            pref_terms.append((term, cui))
             pref_term = True
 
 
@@ -172,6 +196,13 @@ def parse_args():
         default="ENG",
         choices=LANGUAGES,
         help="Extract concepts of the specified language",
+    )
+    ap.add_argument(
+        "-S",
+        "--sources",
+        default=None,
+        nargs="*",
+        help="List of sources for which a concept has to have at least one term from",
     )
     opts = ap.parse_args()
     return opts
@@ -246,6 +277,7 @@ def main():
         simstring_dir,
         cuisty_dir,
         database_backend=opts.database_backend,
+        sources=opts.sources,
     )
 
 
