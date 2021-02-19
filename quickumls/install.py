@@ -117,8 +117,8 @@ def parse_and_encode_ngrams(
                         f"did not find preferred term for cui {prev_cui}"
                     )
                 if sources is None or cui_sources.intersection(sources):
-                    for term in ss_db_terms:
-                        ss_db.insert(term)
+                    for _term in ss_db_terms:
+                        ss_db.insert(_term)
                     for _data in cuisty_terms:
                         cuisty_db.insert(*_data)
                     for _data in pref_terms:
