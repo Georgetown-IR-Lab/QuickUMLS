@@ -1,6 +1,6 @@
 leveldb>=0.193
 numpy>=1.8.2
-spacy>=1.6.0
+spacy=3.0.6
 unidecode>=0.4.19
 nltk>=3.3
 quickumls_simstring>=1.1.5r1
