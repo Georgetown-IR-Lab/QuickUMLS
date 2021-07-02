@@ -185,12 +185,12 @@ DOMAIN_SPECIFIC_STOPWORDS = {
 }
 
 SPACY_LANGUAGE_MAP = {
-    'ENG': 'en',
-    'GER': 'de',
-    'SPA': 'es',
-    'POR': 'pt',
-    'FRE': 'fr',
-    'ITA': 'it',
-    'DUT': 'nl',
+    'ENG': 'en_core_web_sm',
+    'GER': 'de_core_news_sm',
+    'SPA': 'es_core_news_sm',
+    'POR': 'pt_core_news_sm',
+    'FRE': 'fr_core_news_sm',
+    'ITA': 'it_core_news_sm',
+    'DUT': 'nl_core_news_sm',
     'XXX': 'xx'
 }
