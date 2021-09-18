@@ -445,11 +445,11 @@ class QuickUMLS(object):
         parsed = self.nlp(u'{}'.format(text))
         
         # pass in parsed spacy doc to get concept matches
-        matches = self._match(parsed)
+        matches = self._match(parsed, best_match, ignore_syntax)
 
         return matches
         
-    def _match(self, doc, best_match=True, ignore_syntax=False):
+    def _match(self, doc, best_match, ignore_syntax):
         """Gathers ngram matches given a spaCy document object.
 
         [extended_summary]
