@@ -5,3 +5,4 @@ unidecode>=0.4.19
 nltk>=3.3
 quickumls_simstring>=1.1.5r1
 unqlite>=0.8.1
+six
