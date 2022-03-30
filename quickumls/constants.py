@@ -222,12 +222,12 @@ LANGUAGES = {
 DOMAIN_SPECIFIC_STOPWORDS = {"time"}
 
 SPACY_LANGUAGE_MAP = {
-    "ENG": "en_core_web_sm",
-    "GER": "de_core_web_sm",
-    "SPA": "es_core_web_sm",
-    "POR": "pt_core_web_sm",
-    "FRE": "fr_core_web_sm",
-    "ITA": "it_core_web_sm",
-    "DUT": "nl_core_web_sm",
-    "XXX": "xx",
+    'ENG': 'en_core_web_sm',
+    'GER': 'de_core_news_sm',
+    'SPA': 'es_core_news_sm',
+    'POR': 'pt_core_news_sm',
+    'FRE': 'fr_core_news_sm',
+    'ITA': 'it_core_news_sm',
+    'DUT': 'nl_core_news_sm',
+    'XXX': 'xx'
 }
