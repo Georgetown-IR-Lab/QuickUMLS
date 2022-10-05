@@ -44,6 +44,7 @@ class SpacyQuickUMLS(object):
         matches = self.quickumls._match(doc, best_match=self.best_match, ignore_syntax=self.ignore_syntax)
         
         # Convert QuickUMLS match objects into Spans
+        doc.spans['sc'] = []
         for match in matches:
             # each match may match multiple ngrams
             for ngram_match_dict in match:
