@@ -1,3 +1,5 @@
+MEDSPACY_DEFAULT_SPAN_GROUP_NAME = 'medspacy_spans'
+
 HEADERS_MRCONSO = [
     'cui', 'lat', 'ts', 'lui', 'stt', 'sui', 'ispref', 'aui', 'saui',
     'scui', 'sdui', 'sab', 'tty', 'code', 'str', 'srl', 'suppress', 'cvf'
