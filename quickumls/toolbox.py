@@ -12,7 +12,7 @@ from six.moves import xrange
 
 # installed modules
 import numpy
-import leveldb
+import plyvel
 try:
     import unqlite
     UNQLITE_AVAILABLE = True
@@ -240,12 +240,12 @@ class CuiSemTypesDB(object):
             self.semtypes_db_put = self.semtypes_db.store
             self.semtypes_db_get = self.semtypes_db.fetch
         elif database_backend == 'leveldb':
-            self.cui_db = leveldb.LevelDB(os.path.join(path, 'cui.leveldb'))
-            self.cui_db_put = self.cui_db.Put
-            self.cui_db_get = self.cui_db.Get
-            self.semtypes_db = leveldb.LevelDB(os.path.join(path, 'semtypes.leveldb'))
-            self.semtypes_db_put = self.semtypes_db.Put
-            self.semtypes_db_get = self.semtypes_db.Get
+            self.cui_db = plyvel.DB(os.path.join(path, 'cui.leveldb'), create_if_missing=True)
+            self.cui_db_put = self.cui_db.put
+            self.cui_db_get = self.cui_db.get
+            self.semtypes_db = plyvel.DB(os.path.join(path, 'semtypes.leveldb'), create_if_missing=True)
+            self.semtypes_db_put = self.semtypes_db.put
+            self.semtypes_db_get = self.semtypes_db.get
         else:
             raise ValueError(f'database_backend {database_backend} not recognized')
 
