@@ -1,5 +1,8 @@
 # Working on QuickUMLS
 
+QuickUMLS matches phrases in biomedical text to UMLS concepts, and this guide
+explains how to develop, test, and submit changes to the project.
+
 ## Worktrees and pull requests
 
 Use `git worktree list` to find the main checkout and set `GIT_DIRECTORY` to its

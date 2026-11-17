@@ -1,1 +1,1 @@
-please read agents.md
+Agents guidelines are stored in AGENTS.md file.
