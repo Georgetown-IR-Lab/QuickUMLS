@@ -96,3 +96,6 @@ simstring/
 
 # Ignored test file
 test.py
+
+# Local test environment, licensed UMLS inputs and generated indexes
+/.sandbox/

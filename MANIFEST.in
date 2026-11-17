@@ -1,2 +1,3 @@
 include requirements.txt
 include README.md
+include tests/test_index.py tests/standin.py tests/fixtures/umls/*.RRF tests/fixtures/corpora/stopwords/english
