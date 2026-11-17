@@ -3,6 +3,11 @@
 QuickUMLS matches phrases in biomedical text to UMLS concepts, and this guide
 explains how to develop, test, and submit changes to the project.
 
+## Plans and proposals
+
+When a user asks you to draft a plan or proposal for a change, keep the draft
+outside the repository unless they explicitly ask to store it in the repository.
+
 ## Worktrees and pull requests
 
 Use `git worktree list` to find the main checkout and set `GIT_DIRECTORY` to its
