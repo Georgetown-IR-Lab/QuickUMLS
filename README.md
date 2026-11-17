@@ -8,18 +8,28 @@ For more details on how QuickUMLS works, we remand to our paper.
 
 This project should be compatible with Python 3 (Python 2 is [no longer supported](https://pythonclock.org/)) and run on any UNIX system (support for Windows is experimental, please report bugs!). **If you find any bugs, please file an issue on GitHub or email the author at luca@ir.cs.georgetown.edu**.
 
+## Try the test vocabulary
+
+From this checkout in a Python 3.11 environment, install the package once. You can then query the test vocabulary or run the suite.
+
+```sh
+python -m pip install -e .
+python tests/standin.py "amber stone"
+python -m unittest discover -s tests -v
+```
+
+`amber stone` matches the invented concept `C2` with a similarity of 1.0. Both commands use the [editable stand-in data](tests/fixtures/umls) and automatically build a temporary index. They run offline after installation and require no UMLS license or model download.
+
 ## Installation
 
-1. **Obtain a UMLS installation** This tool requires you to have a valid UMLS installation on disk. To install UMLS, you must first obtain a [license](https://uts.nlm.nih.gov/license.html) from the National Library of Medicine; then you should download all UMLS files from [this page](https://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html); finally, you can install UMLS using the [MetamorphoSys](https://www.nlm.nih.gov/pubs/factsheets/umlsmetamorph.html) tool as [explained in this guide](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html).  The installation can be removed once the system has been initialized.
-2. **Install QuickUMLS**: You can do so by either running `pip install quickumls` or `python setup.py install`. On macOS, using anaconda is **strongly recommended**<sup>†</sup>.
+1. **Obtain a UMLS release.** Follow the [NLM licensing and access instructions](https://www.nlm.nih.gov/databases/umls.html). To use only SNOMED CT or RxNorm, select that source when preparing the subset in [MetamorphoSys](https://www.nlm.nih.gov/research/umls/implementation_resources/metamorphosys/help.html).
+2. **Install QuickUMLS.** For the features described here, use Python 3.11 and run `python -m pip install .` from this checkout. Use `python -m pip install '.[leveldb]'` to open or create a LevelDB index. The published release is available with `python -m pip install quickumls`.
 3. **Create a QuickUMLS installation** Initialize the system by running `python -m quickumls.install <umls_installation_path> <destination_path>`, where `<umls_installation_path>` is where the installation files are (in particular, we need `MRCONSO.RRF` and `MRSTY.RRF`) and `<destination_path>` is the directory where the QuickUmls data files should be installed. This process will take between 5 and 30 minutes depending how fast the CPU and the drive where UMLS and QuickUMLS files are stored are (on a system with a Intel i7 6700K CPU and a 7200 RPM hard drive, initialization takes 8.5 minutes). `python -m quickumls.install` supports the following optional arguments:
     - `-L` / `--lowercase`: if used, all concept terms are folded to lowercase before being processed. This option typically increases recall, but it might reduce precision;
     - `-U` / `--normalize-unicode`: if used, expressions with non-ASCII characters are converted to the closest combination of ASCII characters.
     - `-E` / `--language`: Specify the language to consider for UMLS concepts; by default, English is used. For a complete list of languages, please see [this table provided by NLM](https://www.nlm.nih.gov/research/umls/knowledge_sources/metathesaurus/release/abbreviations.html#LAT).
-    - `-d` / `--database-backend`: Specify which database backend to use for QuickUMLS. The two options are `leveldb` and `unqlite`. The latter supports multi-process reading and has better unicode compatibility, and it used as default for all new 1.4 installations; the former is still used as default when instantiating a QuickUMLS client. More info about differences between the two databases and migration info are available [here](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4).
-
-
-**†**: If the installation fails on macOS when using Anaconda, install `leveldb` first by running `conda install -c conda-forge python-leveldb`.
+    - `-d` / `--database-backend` selects storage for CUIs and semantic types. New indexes use `unqlite` by default. The matcher reads the index's backend flag and assumes `leveldb` for older indexes without a flag.
+    - `--skip-spacy` builds the index without checking or downloading a spaCy model. Before matching, install your model and the NLTK stopwords corpus. See the [test and sandbox instructions](docs/open-issue-plan.md#running-the-tests).
 
 ## APIs
 
@@ -28,13 +38,13 @@ A QuickUMLS object can be instantiated as follows:
 ```python
 from quickumls import QuickUMLS
 
-matcher = QuickUMLS(quickumls_fp, overlapping_criteria, threshold,
-                    similarity_name, window, accepted_semtypes)
+matcher = QuickUMLS(quickumls_fp)
 ```
 
 Where:
 
 - `quickumls_fp` is the directory where the QuickUMLS data files are installed.
+- `spacy_model` accepts an installed spaCy package name or a local pipeline directory. By default, the matcher loads the model for the index language.
 - `overlapping_criteria` (optional, default: "score") is the criteria used to deal with overlapping concepts; choose "score" if the matching score of the concepts should be consider first, "length" if the longest should be considered first instead.
 - `threshold` (optional, default: 0.7) is the minimum similarity value between strings.
 - `similarity_name` (optional, default: "jaccard") is the name of similarity to use. Choose between "dice", "jaccard", "cosine", or "overlap".
@@ -59,13 +69,11 @@ QuickUMLS can be used for standalone processing but it can also be use as a comp
 Adding QuickUMLS as a component in a pipeline can be done as follows:
 
 ```python
-from quickumls.spacy_component import SpacyQuickUMLS
+import spacy
+import quickumls.spacy_component  # registers the quickumls factory
 
-# common English pipeline
 nlp = spacy.load('en_core_web_sm')
-
-quickumls_component = SpacyQuickUMLS(nlp, 'PATH_TO_QUICKUMLS_DATA')
-nlp.add_pipe(quickumls_component)
+nlp.add_pipe('quickumls', config={'quickumls_fp': 'PATH_TO_QUICKUMLS_DATA'})
 
 doc = nlp('Pt c/o shortness of breath, chest pain, nausea, vomiting, diarrrhea')
 
@@ -75,6 +83,8 @@ for ent in doc.ents:
     print('Similarity : {}'.format(ent._.similarity))
     print('Semtypes : {}'.format(ent._.semtypes))
 ```
+
+To keep all alternatives, pass `'options': {'best_match': False}` in the factory config and read `doc._.quickumls`. Each group contains its candidate CUIs, scores, and semantic types. `doc.ents` retains upstream entities and adds the highest-ranked compatible QuickUMLS spans.
 
 ## Server / Client Support
 
@@ -86,7 +96,7 @@ To start the server, run `python -m quickumls.server`:
 python -m quickumls.server /path/to/quickumls/files {-P QuickUMLS port} {-H QuickUMLS host} {QuickUMLS options}
 ```
 
-Host and port are optional; by default, QuickUMLS runs on `localhost:4645`. You can also pass any QuickUMLS option mentioned above to the server. To obtain a list of options for the server, run `python -m quickumls.server -h`.
+Host and port default to `localhost:4645`. For example, `--accepted-semtypes T047 T184` restricts the server to concepts with either semantic type. Run `python -m quickumls.server -h` for the available options.
 
 To load the client, import `get_quickumls_client` from `quickumls`:
 

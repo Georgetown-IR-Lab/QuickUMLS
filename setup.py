@@ -58,6 +58,7 @@ def setup_package():
         url='https://github.com/Georgetown-IR-Lab/QuickUMLS',
         license=about['__license__'],
         install_requires=requirements,
+        extras_require={'leveldb': ['leveldb>=0.193']},
         dependency_links=dependency_links,
         classifiers=[
             "Programming Language :: Python :: 3",

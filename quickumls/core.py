@@ -27,7 +27,7 @@ class QuickUMLS(object):
             similarity_name='jaccard', min_match_length=3,
             accepted_semtypes=constants.ACCEPTED_SEMTYPES,
             verbose=False, keep_uppercase=False,
-            spacy_component = False):
+            spacy_component=False, spacy_model=None):
         """Instantiate QuickUMLS object
 
             This is the main interface through which text can be processed.
@@ -53,6 +53,10 @@ class QuickUMLS(object):
                     distinguishing acronyms from normal words. For this the
                     database should be installed without the -L option.
                     Defaults to False.
+            spacy_model (str or Path, optional): Installed spaCy package name or
+                    pipeline directory for standalone matching. Defaults to the
+                    model for the index language. Component mode uses the
+                    caller's pipeline.
 
         Raises:
             ValueError: Raises a ValueError if QuickUMLS was installed for a language that is not currently supported TODO: verify this?
@@ -74,7 +78,8 @@ class QuickUMLS(object):
         valid_similarities = {'dice', 'jaccard', 'cosine', 'overlap'}
         err_msg = ('"{}" is not a valid similarity name. Choose between '
                    '{}'.format(similarity_name, ', '.join(valid_similarities)))
-        assert not(valid_similarities in valid_similarities), err_msg
+        if similarity_name not in valid_similarities:
+            raise ValueError(err_msg)
         self.similarity_name = similarity_name
 
         simstring_fp = os.path.join(quickumls_fp, 'umls-simstring.db')
@@ -120,12 +125,10 @@ class QuickUMLS(object):
             raise ValueError('Language "{}" not supported'.format(self.language_flag))
         elif constants.LANGUAGES[self.language_flag] is None:
             self._stopwords = set()
-            spacy_lang = 'XXX'
         else:
             self._stopwords = set(
                 nltk.corpus.stopwords.words(constants.LANGUAGES[self.language_flag])
             )
-            spacy_lang = constants.SPACY_LANGUAGE_MAP[self.language_flag]
 
         database_backend_fp = os.path.join(quickumls_fp, 'database_backend.flag')
         if os.path.exists(database_backend_fp):
@@ -152,18 +155,18 @@ class QuickUMLS(object):
             # In this case, the pipeline is external to this current class
             self.nlp = None
         else:
-            try:
-                self.nlp = spacy.load(spacy_lang)
-            except OSError:
-                msg = (
-                    'Model for language "{}" is not downloaded. Please '
-                    'run "python -m spacy download {}" before launching '
-                    'QuickUMLS'
-                ).format(
-                    self.language_flag,
-                    constants.SPACY_LANGUAGE_MAP.get(self.language_flag, 'xx')
+            model = spacy_model if spacy_model is not None else constants.SPACY_LANGUAGE_MAP.get(self.language_flag)
+            if model is None:
+                raise ValueError(
+                    'No default spaCy model for language "{}". Supply an '
+                    'installed model name or path with spacy_model.'.format(self.language_flag)
                 )
-                raise OSError(msg)
+            try:
+                self.nlp = spacy.load(model)
+            except OSError as exc:
+                hint = ('Run "python -m spacy download {}".'.format(model)
+                        if spacy_model is None else 'Check the package name or pipeline directory.')
+                raise OSError('Could not load spaCy model "{}". {}'.format(model, hint)) from exc
 
         self.ss_db = toolbox.SimstringDBReader(
             simstring_fp, similarity_name, threshold
@@ -270,21 +273,12 @@ class QuickUMLS(object):
 
             span_end = min(sent_length, i + self.window) + 1
 
-            # we take a shortcut if the token is the last one
-            # in the sentence
-            if (
-                i + 1 == sent_length and            # it's the last token
-                self._is_valid_end_token(tok) and   # it's a valid end token
-                len(tok) >= self.min_match_length   # it's of miminum length
-            ):
-                yield(tok.idx, tok.idx + len(tok), tok.text)
-
             for j in xrange(i + 1, span_end):
                 if compensate:
                     compensate = False
                     continue
 
-                if sent[j - 1] in invalid_mid_tokens:
+                if sent[j - 1].i in invalid_mid_tokens:
                     break
 
                 if not self._is_valid_end_token(sent[j - 1]):
@@ -382,7 +376,7 @@ class QuickUMLS(object):
     def _select_longest(match):
         return ((match[0]['end'] - match[0]['start']), match[0]['similarity'])
 
-    def _select_terms(self, matches):
+    def _select_terms(self, matches, occupied=()):
         sort_func = (
             self._select_longest if self.overlapping_criteria == 'length'
             else self._select_score
@@ -391,6 +385,8 @@ class QuickUMLS(object):
         matches = sorted(matches, key=sort_func, reverse=True)
 
         intervals = toolbox.Intervals()
+        for interval in occupied:
+            intervals.append(interval)
         final_matches_subset = []
 
         for match in matches:
@@ -434,8 +430,8 @@ class QuickUMLS(object):
         Args:
             text (str): Text on which to run the algorithm
 
-            best_match (bool, optional): Whether to return only the top match or all overlapping candidates. Defaults to True.
-            ignore_syntax (bool, optional): Wether to use the heuristcs introduced in the paper (Soldaini and Goharian, 2016). TODO: clarify,. Defaults to False.
+            best_match (bool, optional): Select non-overlapping spans when true.
+            ignore_syntax (bool, optional): Skip the syntactic heuristics when true.
 
         Returns:
             List: List of all matches in the text
@@ -445,7 +441,7 @@ class QuickUMLS(object):
         parsed = self.nlp(u'{}'.format(text))
         
         # pass in parsed spacy doc to get concept matches
-        matches = self._match(parsed)
+        matches = self._match(parsed, best_match=best_match, ignore_syntax=ignore_syntax)
 
         return matches
         

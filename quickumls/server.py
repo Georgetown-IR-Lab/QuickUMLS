@@ -1,5 +1,7 @@
-from argparse import ArgumentParser
+import re
+from argparse import ArgumentParser, ArgumentTypeError
 
+from . import constants
 from .core import QuickUMLS
 from .network import run_server
 
@@ -13,13 +15,20 @@ def run_quickumls_server(opts):
         window=opts.window,
         min_match_length=opts.min_match_length,
         verbose=opts.verbose,
-        keep_uppercase=opts.keep_uppercase
+        keep_uppercase=opts.keep_uppercase,
+        accepted_semtypes=set(opts.accepted_semtypes)
     )
 
     run_server(matcher, host=opts.host, port=opts.port, buffersize=4096)
 
 
-def parse_args():
+def semantic_type(value):
+    if not re.fullmatch(r'T[0-9]{3}', value):
+        raise ArgumentTypeError('expected a semantic type like T047, got {!r}'.format(value))
+    return value
+
+
+def parse_args(argv=None):
     ap = ArgumentParser(
         prog='QuickUMLS server',
         description=(
@@ -69,6 +78,11 @@ def parse_args():
         help='minimum length of a match'
     )
     ap.add_argument(
+        '--accepted-semtypes', '--accepted_semtypes', metavar='TUI', nargs='+',
+        type=semantic_type, default=constants.ACCEPTED_SEMTYPES,
+        help='accept concepts with any of these semantic types, e.g. T047 T184'
+    )
+    ap.add_argument(
         '-v', '--verbose', action='store_true',
         help='return verbose information while running'
     )
@@ -79,7 +93,7 @@ def parse_args():
              'useful for distinguishing acronyms from normal words. For this '
              'the database should be installed without the -L option.'
     )
-    return ap.parse_args()
+    return ap.parse_args(argv)
 
 
 def main():

@@ -3,10 +3,13 @@ from __future__ import unicode_literals, division, print_function
 # built in modules
 import argparse
 import codecs
+from contextlib import closing, contextmanager
 import os
 from six.moves import input
 import shutil
+import sqlite3
 import sys
+from tempfile import TemporaryDirectory
 import time
 try:
     from unidecode import unidecode
@@ -48,7 +51,16 @@ def get_mrconso_iterator(path, headers, lang='ENG'):
 def extract_from_mrconso(
         mrconso_path, mrsty_path, opts,
         mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
+    atoms = _iter_atoms(mrconso_path, mrsty_path, opts, mrconso_header, mrsty_header)
+    with _seen_database(getattr(opts, 'destination_path', None)) as seen:
+        for atom in atoms:
+            term, cui = atom[:2]
+            if _first_pair(seen, term, cui):
+                yield atom
 
+
+def _iter_atoms(mrconso_path, mrsty_path, opts,
+                mrconso_header=HEADERS_MRCONSO, mrsty_header=HEADERS_MRSTY):
     start = time.time()
     print('loading semantic types...', end=' ')
     sys.stdout.flush()
@@ -63,7 +75,6 @@ def extract_from_mrconso(
 
     total = countlines(mrconso_path)
 
-    processed = set()
     i = 0
 
     for content in mrconso_iterator:
@@ -87,11 +98,6 @@ def extract_from_mrconso(
         if opts.normalize_unicode:
             concept_text = unidecode(concept_text)
 
-        if (cui, concept_text) in processed:
-            continue
-        else:
-            processed.add((cui, concept_text))
-
         yield (concept_text, cui, sem_types[cui], preferred)
 
     delta = time.time() - start
@@ -102,7 +108,25 @@ def extract_from_mrconso(
     print(status)
 
 
-def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend):
+@contextmanager
+def _seen_database(directory):
+    # Track original spellings. The permanent databases normalize their keys to
+    # NFKD, which can merge distinct input terms with different preferred flags.
+    with TemporaryDirectory(dir=directory) as temp:
+        with closing(sqlite3.connect(os.path.join(temp, 'seen.sqlite'))) as db:
+            # These keys can be discarded on any failure, including an interruption.
+            db.execute('PRAGMA journal_mode = OFF')
+            db.execute('CREATE TABLE seen (term TEXT, cui TEXT, '
+                       'PRIMARY KEY (term, cui)) WITHOUT ROWID')
+            yield db
+
+
+def _first_pair(db, term, cui):
+    return db.execute('INSERT OR IGNORE INTO seen VALUES (?, ?)', (term, cui)).rowcount == 1
+
+
+def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_backend,
+                            deduplicate_pairs=False):
     # Create destination directories for the two databases
     mkdir(simstring_dir)
     mkdir(cuisty_dir)
@@ -110,14 +134,17 @@ def parse_and_encode_ngrams(extracted_it, simstring_dir, cuisty_dir, database_ba
     ss_db = SimstringDBWriter(simstring_dir)
     cuisty_db = CuiSemTypesDB(cuisty_dir, database_backend=database_backend)
 
-    simstring_terms = set()
-
-    for i, (term, cui, stys, preferred) in enumerate(extracted_it, start=1):
-        if term not in simstring_terms:
-            ss_db.insert(term)
-            simstring_terms.add(term)
-
-        cuisty_db.insert(term, cui, stys, preferred)
+    with _seen_database(cuisty_dir) as seen:
+        for term, cui, stys, preferred in extracted_it:
+            first_pair = _first_pair(seen, term, cui)
+            if first_pair:
+                # The (term, cui) primary key also indexes the term by itself.
+                other = seen.execute('SELECT 1 FROM seen WHERE term = ? LIMIT 1 OFFSET 1',
+                                     (term,)).fetchone()
+                if other is None:
+                    ss_db.insert(term)
+            if first_pair or not deduplicate_pairs:
+                cuisty_db.insert(term, cui, stys, preferred)
 
 
 def install_spacy(lang):
@@ -161,6 +188,8 @@ def parse_args():
         '-E', '--language', default='ENG', choices=LANGUAGES,
         help='Extract concepts of the specified language'
     )
+    ap.add_argument('--skip-spacy', action='store_true',
+                    help='Build the index without loading or downloading a spaCy model')
     opts = ap.parse_args()
     return opts
 
@@ -168,7 +197,8 @@ def parse_args():
 def main():
     opts = parse_args()
 
-    install_spacy(opts.language)
+    if not opts.skip_spacy:
+        install_spacy(opts.language)
 
     if not os.path.exists(opts.destination_path):
         msg = ('Directory "{}" does not exists; should I create it? [y/N] '
@@ -220,13 +250,13 @@ def main():
     mrconso_path = os.path.join(opts.umls_installation_path, 'MRCONSO.RRF')
     mrsty_path = os.path.join(opts.umls_installation_path, 'MRSTY.RRF')
 
-    mrconso_iterator = extract_from_mrconso(mrconso_path, mrsty_path, opts)
+    mrconso_iterator = _iter_atoms(mrconso_path, mrsty_path, opts)
 
     simstring_dir = os.path.join(opts.destination_path, 'umls-simstring.db')
     cuisty_dir = os.path.join(opts.destination_path, 'cui-semtypes.db')
 
     parse_and_encode_ngrams(mrconso_iterator, simstring_dir, cuisty_dir,
-                            database_backend=opts.database_backend)
+                            database_backend=opts.database_backend, deduplicate_pairs=True)
 
 
 if __name__ == '__main__':
