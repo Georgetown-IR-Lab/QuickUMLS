@@ -44,6 +44,7 @@ class SpacyQuickUMLS(object):
         matches = self.quickumls._match(doc, best_match=self.best_match, ignore_syntax=self.ignore_syntax)
         
         # Convert QuickUMLS match objects into Spans
+        doc.spans['sc'] = []
         for match in matches:
             # each match may match multiple ngrams
             for ngram_match_dict in match:
@@ -62,6 +63,16 @@ class SpacyQuickUMLS(object):
                 # add some custom metadata to the spans
                 span._.similarity = ngram_match_dict['similarity']
                 span._.semtypes = ngram_match_dict['semtypes']
-                doc.ents = list(doc.ents) + [span]
                 
+                # OLD: doc.ents = list(doc.ents) + [span]
+                # Using doc.spans["sc"] (SpanCategorizer) to solve the problem of overlapped tokens in nested NER for spacy.
+                # With doc.spans["sc"], all possible entities are stored without throwing errors.
+                doc.spans["sc"] = list(doc.spans["sc"]) + [span]
+
+        # After storing all possible spans, we filter out overlapping spans before adding them to doc.ents. 
+        # Here we remove overlapping spans using spacy.util.filter_spans 
+        # When spans overlap, the rule is to prefer the first longest span over shorter ones.
+        for span in spacy.util.filter_spans(doc.spans["sc"]):
+            doc.ents = list(doc.ents) + [span]
+
         return doc
