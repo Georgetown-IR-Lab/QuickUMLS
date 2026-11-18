@@ -1,4 +1,4 @@
-leveldb>=0.193
+plyvel>=1.5.1
 numpy>=1.8.2
 spacy>=3.0.6
 unidecode>=0.4.19
