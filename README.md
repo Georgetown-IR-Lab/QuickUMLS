@@ -54,7 +54,7 @@ If the matcher throws a warning during initialization, read [this page](https://
 
 ## spaCy pipeline component
 
-QuickUMLS can be used for standalone processing but it can also be use as a component in a modular spaCy pipeline.  This follows traditional spaCy handling of concepts to be entity objects added to the Document object.  These entity objects contain the CUI, similarity score and Semantic Types in the spacy "underscore" object.
+QuickUMLS can be used for standalone processing but it can also be use as a component in a modular spaCy pipeline.  This follows traditional spaCy handling of concepts to be entity objects added to the Document object.  These entity objects contain the CUI, similarity score and Semantic Types in the spacy "underscore" object.  Note that this implementation follows a [known spacy convention](https://github.com/explosion/spaCy/issues/3608) that entity Spans cannot overlap on a single token. To prevent token overlap, matches are ranked according to the `overlapping_criteria` supplied so that overlap of any tokens will be prioritized by this order.
 
 Adding QuickUMLS as a component in a pipeline can be done as follows:
 
