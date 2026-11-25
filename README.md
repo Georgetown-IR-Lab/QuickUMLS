@@ -19,6 +19,8 @@ This checkout supports Python 3.8 through 3.11 on Unix. The published SimString 
     - `-d` / `--database-backend`: Specify which database backend to use for QuickUMLS. The two options are `leveldb` and `unqlite`. The latter supports multi-process reading and has better unicode compatibility, and it used as default for all new 1.4 installations; the former is still used as default when instantiating a QuickUMLS client. More info about differences between the two databases and migration info are available [here](https://github.com/Georgetown-IR-Lab/QuickUMLS/wiki/Migration-QuickUMLS-1.3-to-1.4).
 
 
+The index installer downloads the spaCy model for the selected language when needed. Use `uv sync --locked --inexact` for subsequent syncs to keep that model in the environment.
+
 If the installation fails on macOS when using Anaconda, install `leveldb` first by running `conda install -c conda-forge python-leveldb`.
 
 ## Testing and building with uv
