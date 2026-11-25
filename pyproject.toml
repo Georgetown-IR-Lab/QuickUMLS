@@ -1,0 +1,38 @@
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14"]
+build-backend = "uv_build"
+
+[project]
+name = "quickumls"
+version = "1.4.2"
+description = "QuickUMLS is a tool for fast, unsupervised biomedical concept extraction from medical text"
+readme = "README.md"
+authors = [{ name = "Luca Soldaini", email = "luca@soldaini.net" }]
+license = "MIT"
+license-files = ["LICENSE.txt"]
+# The published SimString binding imports imp, which was removed in Python 3.12.
+requires-python = ">=3.8,<3.12"
+dependencies = [
+    "leveldb>=0.193",
+    "nltk>=3.3",
+    "numpy>=1.8.2",
+    "quickumls-simstring>=1.1.5.post1",
+    "six",
+    "spacy>=3.0.6",
+    "unidecode>=0.4.19",
+    "unqlite>=0.8.1",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.urls]
+Homepage = "https://github.com/Georgetown-IR-Lab/QuickUMLS"
+
+[tool.uv.build-backend]
+module-root = ""
+source-include = ["tests/**"]
