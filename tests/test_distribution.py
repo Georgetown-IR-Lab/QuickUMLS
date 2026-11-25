@@ -17,7 +17,7 @@ class DistributionTest(unittest.TestCase):
         self.assertEqual(version("quickumls"), __version__)
 
     def test_install_and_match(self):
-        with TemporaryDirectory() as tmp:
+        with TemporaryDirectory() as tmp, patch("nltk.data.path", [tmp]):
             root = Path(tmp)
             index = root / "index"
             index.mkdir()
